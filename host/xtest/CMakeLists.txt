@@ -86,6 +86,16 @@ if (CFG_PKCS11_TA)
 	list (APPEND SRC pkcs11_1000.c)
 endif()
 
+if (CFG_GP_PACKAGE_PATH)
+	list (APPEND SRC
+		gp_7000.c
+		gp_7500.c
+		gp_8000.c
+		gp_8500.c
+		gp_9000.c
+	)
+endif()
+
 ################################################################################
 # Built binary
 ################################################################################
@@ -109,6 +119,20 @@ target_link_libraries (${PROJECT_NAME}
 	PRIVATE ${OPENSSL_PRIVATE_LINK}
 	PRIVATE ckteec
 )
+
+if (CFG_GP_PACKAGE_PATH)
+        target_compile_definitions (${PROJECT_NAME}
+                PRIVATE -DWITH_GP_TESTS
+	)
+
+	target_compile_options (${PROJECT_NAME}
+		PRIVATE -Wno-unused-function
+		PRIVATE -Wno-unused-label
+		PRIVATE -Wno-unused-value
+		PRIVATE -Wno-unused-variable
+		PRIVATE -Wno-unused-parameter
+	)
+endif()
 
 ################################################################################
 # Install targets
