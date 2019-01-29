@@ -437,29 +437,39 @@ static TEEC_Result convert_from_string(ADBG_Case_t *c, TEEC_Session *s,
 	size_t spos = strlen(str);
 	int32_t sign = 1;
 	size_t os_len = spos / 2 + 1;
-	uint8_t *os = calloc(1, os_len);
+	uint8_t *os = NULL;
 	int ospos = os_len - 1;
 	int nibble;
 
+	if (os_len == 1)
+		return res;
+
+	os = calloc(1, os_len);
 	if (!os)
 		return TEEC_ERROR_OUT_OF_MEMORY;
 
-	while (spos) {
-		spos--;
-		nibble = digit_value(str[spos]);
-		if (nibble == -1)
+	while (true) {
+		nibble = digit_value(str[spos - 1]);
+		if (nibble == -1) {
+			spos--;
 			break;
+		}
 		os[ospos] = nibble;
+
+		if (spos > 1) {
+			nibble = digit_value(str[spos - 2]);
+			if (nibble == -1) {
+				spos -= 2;
+				break;
+			}
+			os[ospos] |= nibble << 4;
+			ospos--;
+			spos--;
+		}
+		spos--;
 
 		if (!spos)
 			break;
-		spos--;
-		nibble = digit_value(str[spos]);
-		if (nibble == -1)
-			break;
-
-		os[ospos] |= nibble << 4;
-		ospos--;
 	}
 
 	if (spos)
