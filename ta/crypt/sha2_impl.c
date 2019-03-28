@@ -57,7 +57,10 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "stdint.h"
+#include <stddef.h>
+#include <stdint.h>
+#include <tee_api.h>
+
 #include "sha2_impl.h"
 
 #define SHFR(x, n)    (x >> n)
@@ -136,14 +139,14 @@ uint32_t sha256_k[64] = {
 void sha256_transf(struct sha256_ctx *ctx, const unsigned char *message,
 		   unsigned int block_nb)
 {
-	uint32_t w[64];
-	uint32_t wv[8];
-	uint32_t t1, t2;
-	const unsigned char *sub_block;
-	int i;
-
+	uint32_t w[64] = { 0 };
+	uint32_t wv[8] = { 0 };
+	uint32_t t1 = 0;
+	uint32_t t2 = 0;
+	const unsigned char *sub_block = NULL;
+	int i = 0;
 #ifndef UNROLL_LOOPS
-	int j;
+	int j = 0;
 #endif
 
 	for (i = 0; i < (int)block_nb; i++) {
@@ -333,6 +336,8 @@ void sha256(const unsigned char *message,
 {
 	struct sha256_ctx ctx;
 
+	TEE_MemFill(&ctx, 0, sizeof(ctx));
+
 	sha256_init(&ctx);
 	sha256_update(&ctx, message, len);
 	sha256_final(&ctx, digest);
@@ -341,7 +346,7 @@ void sha256(const unsigned char *message,
 void sha256_init(struct sha256_ctx *ctx)
 {
 #ifndef UNROLL_LOOPS
-	int i;
+	int i = 0;
 
 	for (i = 0; i < 8; i++)
 		ctx->h[i] = sha256_h0[i];
@@ -363,10 +368,12 @@ void sha256_init(struct sha256_ctx *ctx)
 void sha256_update(struct sha256_ctx *ctx, const unsigned char *message,
 		   unsigned int len)
 {
-	unsigned int block_nb;
-	unsigned int new_len, rem_len, tmp_len;
-	const unsigned char *shifted_message;
-	unsigned long int i;
+	unsigned int block_nb = 0;
+	unsigned int new_len = 0;
+	unsigned int rem_len = 0;
+	unsigned int tmp_len = 0;
+	const unsigned char *shifted_message = NULL;
+	unsigned long int i = 0;
 
 	tmp_len = SHA256_BLOCK_SIZE - ctx->len;
 	rem_len = len < tmp_len ? len : tmp_len;
@@ -398,17 +405,17 @@ void sha256_update(struct sha256_ctx *ctx, const unsigned char *message,
 
 void sha256_final(struct sha256_ctx *ctx, unsigned char *digest)
 {
-	unsigned int block_nb;
-	unsigned int pm_len;
-	unsigned int len_b;
-	unsigned long int i_m;
-
+	unsigned int block_nb = 0;
+	unsigned int pm_len = 0;
+	unsigned int len_b = 0;
+	unsigned long int i_m = 0;
 #ifndef UNROLL_LOOPS
-	int i;
+	int i = 0;
 #endif
 
-	block_nb = (1 + ((SHA256_BLOCK_SIZE - 9)
-			 < (ctx->len % SHA256_BLOCK_SIZE)));
+	block_nb = 1;
+	if ((SHA256_BLOCK_SIZE - 9) < (ctx->len % SHA256_BLOCK_SIZE))
+		block_nb++;
 
 	len_b = (ctx->tot_len + ctx->len) << 3;
 	pm_len = block_nb << 6;
@@ -442,6 +449,8 @@ void sha224(const unsigned char *message, unsigned int len,
 {
 	struct sha224_ctx ctx;
 
+	TEE_MemFill(&ctx, 0, sizeof(ctx));
+
 	sha224_init(&ctx);
 	sha224_update(&ctx, message, len);
 	sha224_final(&ctx, digest);
@@ -450,7 +459,7 @@ void sha224(const unsigned char *message, unsigned int len,
 void sha224_init(struct sha224_ctx *ctx)
 {
 #ifndef UNROLL_LOOPS
-	int i;
+	int i = 0;
 
 	for (i = 0; i < 8; i++)
 		ctx->h[i] = sha224_h0[i];
@@ -472,10 +481,12 @@ void sha224_init(struct sha224_ctx *ctx)
 void sha224_update(struct sha224_ctx *ctx, const unsigned char *message,
 		   unsigned int len)
 {
-	unsigned int block_nb;
-	unsigned int new_len, rem_len, tmp_len;
-	const unsigned char *shifted_message;
-	unsigned long int i;
+	unsigned int block_nb = 0;
+	unsigned int new_len = 0;
+	unsigned int rem_len = 0;
+	unsigned int tmp_len = 0;
+	const unsigned char *shifted_message = NULL;
+	unsigned long int i = 0;
 
 	tmp_len = SHA224_BLOCK_SIZE - ctx->len;
 	rem_len = len < tmp_len ? len : tmp_len;
@@ -507,17 +518,17 @@ void sha224_update(struct sha224_ctx *ctx, const unsigned char *message,
 
 void sha224_final(struct sha224_ctx *ctx, unsigned char *digest)
 {
-	unsigned int block_nb;
-	unsigned int pm_len;
-	unsigned int len_b;
-	unsigned long int i_m;
-
+	unsigned int block_nb = 0;
+	unsigned int pm_len = 0;
+	unsigned int len_b = 0;
+	unsigned long int i_m = 0;
 #ifndef UNROLL_LOOPS
-	int i;
+	int i = 0;
 #endif
 
-	block_nb = (1 + ((SHA224_BLOCK_SIZE - 9)
-			 < (ctx->len % SHA224_BLOCK_SIZE)));
+	block_nb = 1;
+	if ((SHA224_BLOCK_SIZE - 9) < (ctx->len % SHA224_BLOCK_SIZE))
+		block_nb++;
 
 	len_b = (ctx->tot_len + ctx->len) << 3;
 	pm_len = block_nb << 6;
