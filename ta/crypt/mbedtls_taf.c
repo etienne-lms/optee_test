@@ -35,6 +35,7 @@ ta_entry_mbedtls_self_tests(uint32_t param_type,
 						TEE_PARAM_TYPE_NONE,
 						TEE_PARAM_TYPE_NONE,
 						TEE_PARAM_TYPE_NONE);
+
 	if (param_type != exp_pt)
 		return TEE_ERROR_BAD_PARAMETERS;
 
@@ -70,10 +71,13 @@ TEE_Result ta_entry_mbedtls_check_cert(uint32_t param_type,
 						TEE_PARAM_TYPE_MEMREF_INPUT,
 						TEE_PARAM_TYPE_NONE,
 						TEE_PARAM_TYPE_NONE);
-	int ret;
-	uint32_t flags;
+	int ret = 0;
+	uint32_t flags = 0;
 	mbedtls_x509_crt crt;
 	mbedtls_x509_crt trust_crt;
+
+	memset(&crt, 0 , sizeof(crt));
+	memset(&trust_crt, 0 , sizeof(trust_crt));
 
 	if (param_type != exp_pt)
 		return TEE_ERROR_BAD_PARAMETERS;
@@ -109,7 +113,6 @@ out:
 	mbedtls_x509_crt_free(&crt);
 
 	return res;
-
 }
 
 static int f_rng(void *rng __unused, unsigned char *output, size_t output_len)
@@ -121,8 +124,8 @@ static int f_rng(void *rng __unused, unsigned char *output, size_t output_len)
 static TEE_Result write_cert(mbedtls_x509write_cert *crt, void *buf,
 			     size_t *blen)
 {
-	int ret;
-	void *b;
+	int ret = 0;
+	void *b = NULL;
 	size_t bl = 1024;
 
 	ret = mbedtls_x509write_crt_pem(crt, buf, *blen, f_rng, NULL);
@@ -159,8 +162,8 @@ static TEE_Result write_cert(mbedtls_x509write_cert *crt, void *buf,
 
 static TEE_Result parse_issuer_cert(mbedtls_x509_crt *crt)
 {
-	int ret;
-	unsigned char *buf;
+	int ret = 0;
+	unsigned char *buf = NULL;
 
 	buf = TEE_Malloc(mid_crt_size + 1, TEE_MALLOC_FILL_ZERO);
 	if (!buf)
@@ -179,8 +182,8 @@ static TEE_Result parse_issuer_cert(mbedtls_x509_crt *crt)
 
 static TEE_Result parse_issuer_key(mbedtls_pk_context *pk)
 {
-	int ret;
-	unsigned char *buf;
+	int ret = 0;
+	unsigned char *buf = NULL;
 
 	buf = TEE_Malloc(mid_key_size + 1, TEE_MALLOC_FILL_ZERO);
 	if (!buf)
@@ -205,14 +208,20 @@ TEE_Result ta_entry_mbedtls_sign_cert(uint32_t param_type,
 						TEE_PARAM_TYPE_MEMREF_OUTPUT,
 						TEE_PARAM_TYPE_MEMREF_OUTPUT,
 						TEE_PARAM_TYPE_NONE);
-	char name[256];
+	char name[256] = { 0 };
 	mbedtls_mpi serial;
 	mbedtls_x509_crt issuer_crt;
 	mbedtls_pk_context issuer_key;
 	mbedtls_x509write_cert crt;
 	mbedtls_x509_csr csr;
-	int ret;
-	size_t sz;
+	int ret = 0;
+	size_t sz = 0;
+
+	memset(&serial, 0, sizeof(serial));
+	memset(&issuer_crt, 0, sizeof(issuer_crt));
+	memset(&issuer_key, 0, sizeof(issuer_key));
+	memset(&crt, 0, sizeof(crt));
+	memset(&csr, 0, sizeof(csr));
 
 	if (param_type != exp_pt)
 		return TEE_ERROR_BAD_PARAMETERS;
