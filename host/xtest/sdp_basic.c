@@ -88,6 +88,10 @@ static int allocate_ion_buffer_old_api(size_t size, int heap_type_id, int ion)
 	struct ion0_fd_data fd_data;
 	int fd = -1;
 
+	memset(&alloc_data, 0, sizeof(alloc_data));
+	memset(&hdl_data, 0, sizeof(hdl_data));
+	memset(&fd_data, 0, sizeof(fd_data));
+
 	alloc_data.len = size;
 	alloc_data.align = 0;
 	alloc_data.flags = 0;
@@ -114,9 +118,13 @@ int allocate_ion_buffer(size_t size, int heap_type_id, int verbosity)
 	struct ion_heap_query query_data;
 	struct ion_heap_data heap_data[32];
 	struct ion_allocation_data alloc_data;
-	int ion;
+	int ion = 0;
 	int fd = -1;
-	unsigned int idx;
+	unsigned int idx = 0;
+
+	memset(&qery_data, 0, sizeof(query_data));
+	memset(heap_data, 0, sizeof(heap_data));
+	memset(&alloc_data, 0, sizeof(alloc_data));
 
 	ion = open("/dev/ion", O_RDWR);
 	if (ion < 0) {
@@ -182,9 +190,9 @@ static void finalize_tee_ctx(struct tee_ctx *ctx)
 
 static int create_tee_ctx(struct tee_ctx *ctx, enum test_target_ta target_ta)
 {
-	TEEC_Result teerc;
-	const TEEC_UUID *uuid;
-	uint32_t err_origin;
+	TEEC_Result teerc = TEEC_ERROR_GENERIC;
+	const TEEC_UUID *uuid = NULL;
+	uint32_t err_origin = 0;
 
 	switch (target_ta) {
 	case TEST_NS_TO_TA:
@@ -217,10 +225,9 @@ static int create_tee_ctx(struct tee_ctx *ctx, enum test_target_ta target_ta)
 
 static int tee_register_buffer(struct tee_ctx *ctx, void **shm_ref, int fd)
 {
-	TEEC_Result teerc;
-	TEEC_SharedMemory *shm;
+	TEEC_Result teerc = TEEC_ERROR_GENERIC;
+	TEEC_SharedMemory *shm = malloc(sizeof(*shm));
 
-	shm = malloc(sizeof(*shm));
 	if (!shm)
 		return 1;
 
@@ -251,10 +258,10 @@ static int inject_sdp_data(struct tee_ctx *ctx,
 		    void *in, size_t offset, size_t len, void *shm_ref, int ind)
 {
 	TEEC_SharedMemory *shm = (TEEC_SharedMemory *)shm_ref;
-	TEEC_Result teerc;
-	TEEC_Operation op;
-	uint32_t err_origin;
-	unsigned cmd;
+	TEEC_Result teerc = TEEC_ERROR_GENERIC;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t err_origin = 0;
+	unsigned int cmd = 0;
 
 	switch (ind) {
 	case TEST_NS_TO_TA:
@@ -297,10 +304,10 @@ static int transform_sdp_data(struct tee_ctx *ctx,
 			size_t offset, size_t len, void *shm_ref, int ind)
 {
 	TEEC_SharedMemory *shm = (TEEC_SharedMemory *)shm_ref;
-	TEEC_Result teerc;
-	TEEC_Operation op;
-	uint32_t err_origin;
-	unsigned cmd;
+	TEEC_Result teerc = TEEC_ERROR_GENERIC;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t err_origin = 0;
+	unsigned cmd = 0;
 
 	switch (ind) {
 	case TEST_NS_TO_TA:
@@ -338,10 +345,10 @@ static int dump_sdp_data(struct tee_ctx *ctx,
 		  void *out, size_t offset, size_t len, void *shm_ref, int ind)
 {
 	TEEC_SharedMemory *shm = (TEEC_SharedMemory *)shm_ref;
-	TEEC_Result teerc;
-	TEEC_Operation op;
-	uint32_t err_origin;
-	unsigned cmd;
+	TEEC_Result teerc = TEEC_ERROR_GENERIC;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t err_origin = 0;
+	unsigned cmd = 0;
 
 	switch (ind) {
 	case TEST_NS_TO_TA:
@@ -404,11 +411,11 @@ static int get_random_bytes(char *out, size_t len)
 {
 	static char *rand_buf = NULL;
 	static size_t rand_idx = 0;
-	int rc;
+	int rc = 0;
 
 	if (!rand_buf) {
 		const char rand_dev[] = "/dev/urandom";
-		int fd;
+		int fd = 0;
 
 		rand_buf = malloc(RANDOM_BUFFER_SIZE);
 		if (!rand_buf) {
@@ -462,8 +469,8 @@ int sdp_basic_test(enum test_target_ta ta, size_t size, size_t loop,
 	unsigned int err = 1;
 	int fd = -1;
 	size_t sdp_size = size;
-	size_t offset;
-	size_t loop_cnt;
+	size_t offset = 0;
+	size_t loop_cnt = 0;
 
 	if (!loop) {
 		fprintf(stderr, "Error: null loop value\n");
@@ -588,8 +595,8 @@ int sdp_basic_runner_cmd_parser(int argc, char *argv[])
 	int ion_heap = DEFAULT_ION_HEAP_TYPE;
 	int rnd_offset = 1;
 	int verbosity = 1;
-	int err;
-	int i;
+	int err = 0;
+	int i = 0;
 
 	/* Parse command line */
 	for (i = 1; i < argc; i++) {

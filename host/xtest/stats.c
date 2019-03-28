@@ -88,6 +88,10 @@ static int stat_pager(int argc, char *argv[] __unused)
 	uint32_t eo = 0;
 	TEEC_Operation op;
 
+	memset(&ctx, 0 , sizeof(ctx));
+	memset(&sess, 0 , sizeof(sess));
+	memset(&op, 0, sizeof(op));
+
 	if (argc != 1)
 		return usage();
 
@@ -120,17 +124,19 @@ static int stat_alloc(int argc, char *argv[] __unused)
 	TEEC_Session sess;
 	TEEC_Result res = TEEC_ERROR_GENERIC;
 	uint32_t eo = 0;
-	TEEC_Operation op;
+	TEEC_Operation op ;
 	struct malloc_stats *stats = NULL;
 	size_t stats_size_bytes = 0;
 	size_t n = 0;
+
+	memset(&ctx, 0 , sizeof(ctx));
+	memset(&sess, 0 , sizeof(sess));
+	memset(&op, 0, sizeof(op));
 
 	if (argc != 1)
 		return usage();
 
 	open_sess(&ctx, &sess);
-
-	memset(&op, 0, sizeof(op));
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
 					 TEEC_MEMREF_TEMP_OUTPUT,
@@ -194,6 +200,9 @@ static int stat_memleak(int argc, char *argv[] __unused)
 	TEEC_Session sess;
 	TEEC_Result res = TEEC_ERROR_GENERIC;
 	uint32_t eo = 0;
+
+	memset(&ctx, 0 , sizeof(ctx));
+	memset(&sess, 0 , sizeof(sess));
 
 	if (argc != 1)
 		return usage();

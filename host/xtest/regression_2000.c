@@ -42,7 +42,7 @@ static TEE_Result socket_tcp_open(TEEC_Session *session, uint32_t ip_vers,
 				  struct socket_handle *handle,
 				  uint32_t *error, uint32_t *ret_orig)
 {
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 
 	memset(handle, 0, sizeof(*handle));
@@ -72,7 +72,7 @@ static TEE_Result socket_udp_open(TEEC_Session *session, uint32_t ip_vers,
 				  struct socket_handle *handle,
 				  uint32_t *error, uint32_t *ret_orig)
 {
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 
 	memset(handle, 0, sizeof(*handle));
@@ -102,7 +102,7 @@ static TEE_Result socket_send(TEEC_Session *session,
 			      const void *data, size_t *dlen,
 			      uint32_t timeout, uint32_t *ret_orig)
 {
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 
 	op.params[0].tmpref.buffer = handle->buf;
@@ -126,7 +126,7 @@ static TEE_Result socket_recv(TEEC_Session *session,
 			      void *data, size_t *dlen,
 			      uint32_t timeout, uint32_t *ret_orig)
 {
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 
 	op.params[0].tmpref.buffer = handle->buf;
@@ -149,7 +149,7 @@ static TEE_Result socket_get_error(TEEC_Session *session,
 			      struct socket_handle *handle,
 			      uint32_t *proto_error, uint32_t *ret_orig)
 {
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 
 	op.params[0].tmpref.buffer = handle->buf;
@@ -183,7 +183,7 @@ static TEE_Result socket_ioctl(TEEC_Session *session,
 			      struct socket_handle *handle, uint32_t ioctl_cmd,
 			      void *data, size_t *dlen, uint32_t *ret_orig)
 {
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 
 	op.params[0].tmpref.buffer = handle->buf;
@@ -230,9 +230,9 @@ static bool test_200x_tcp_accept_cb(void *ptr, int fd, short *events)
 static bool test_200x_tcp_read_cb(void *ptr, int fd, short *events)
 {
 	struct test_200x_io_state *iostate = ptr;
-	ssize_t r;
-	uint8_t buf[100];
-	uint8_t buf2[100];
+	ssize_t r = 0;
+	uint8_t buf[100] = { 0 };
+	uint8_t buf2[100] = { 0 };
 
 	(void)events;
 	r = read(fd, buf, sizeof(buf));
@@ -252,8 +252,8 @@ static bool test_200x_tcp_write_cb(void *ptr, int fd, short *events)
 {
 	struct test_200x_io_state *iostate = ptr;
 	size_t num_bytes = 100;
-	const void *bytes;
-	ssize_t r;
+	const void *bytes = NULL;
+	ssize_t r = 0;
 
 	(void)events;
 
@@ -269,13 +269,13 @@ static bool test_200x_tcp_write_cb(void *ptr, int fd, short *events)
 static void xtest_tee_test_2001(ADBG_Case_t *c)
 {
 	struct sock_server ts;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	uint32_t proto_error;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+	uint32_t proto_error = 9;
 	struct socket_handle sh;
-	uint8_t buf[64];
-	uint8_t buf2[64];
-	size_t blen;
+	uint8_t buf[64] = { 0 };
+	uint8_t buf2[64] = { 0 };
+	size_t blen = 0;
 	struct test_200x_io_state server_iostate;
 	struct test_200x_io_state local_iostate;
 	struct sock_io_cb cb = {
@@ -284,6 +284,12 @@ static void xtest_tee_test_2001(ADBG_Case_t *c)
 		.write = test_200x_tcp_write_cb,
 		.ptr = &server_iostate,
 	};
+
+	memset(&ts, 0, sizeof(ts));
+	memset(&session, 0, sizeof(session));
+	memset(&sh, 0, sizeof(sh));
+	memset(&server_iostate, 0, sizeof(server_iostate));
+	memset(&local_iostate, 0, sizeof(local_iostate));
 
 	test_200x_init_io_state(&server_iostate, 1, 2);
 	test_200x_init_io_state(&local_iostate, 2, 1);
@@ -423,11 +429,11 @@ static void  xtest_2002_wait_barrier(struct test_2002_barrier *bar)
 static void *xtest_tee_test_2002_thread(void *arg)
 {
 	struct test_2002_arg *a = arg;
-	TEE_Result res;
+	TEE_Result res = TEE_ERROR_GENERIC;
 	struct sock_server ts;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	uint32_t proto_error;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+	uint32_t proto_error = 0;
 	struct socket_handle sh;
 	struct test_200x_io_state server_iostate;
 	struct test_200x_io_state local_iostate;
@@ -442,6 +448,12 @@ static void *xtest_tee_test_2002_thread(void *arg)
 	size_t recv_limit = 10000;
 	size_t sent_bytes = 0;
 	size_t recvd_bytes = 0;
+
+	memset(&ts, 0, sizeof(ts));
+	memset(&session, 0, sizeof(session));
+	memset(&sh, 0, sizeof(sh));
+	memset(&server_iostate, 0, sizeof(server_iostate));
+	memset(&local_iostate, 0, sizeof(local_iostate));
 
 	test_200x_init_io_state(&server_iostate, seed[0], seed[1]);
 	test_200x_init_io_state(&local_iostate, seed[1], seed[0]);
@@ -464,10 +476,10 @@ static void *xtest_tee_test_2002_thread(void *arg)
 		goto out_close_session;
 
 	while (sent_bytes < send_limit && recvd_bytes < recv_limit) {
-		const void *peek;
-		uint8_t buf[64];
-		uint8_t buf2[64];
-		size_t blen;
+		const void *peek = NULL;
+		uint8_t buf[64] = { 0 };
+		uint8_t buf2[64] = { 0 };
+		size_t blen = 0;
 
 		blen = sizeof(buf);
 		peek = rand_stream_peek(local_iostate.write_rs, &blen);
@@ -514,8 +526,11 @@ static void xtest_tee_test_2002(ADBG_Case_t *c)
 	pthread_t thr[NUM_THREADS];
 	struct test_2002_barrier bar = { .mu = PTHREAD_MUTEX_INITIALIZER };
 	struct test_2002_arg arg[NUM_THREADS];
-	size_t n;
-	size_t nt;
+	size_t n = 0;
+	size_t nt = 0;
+
+	memset(thr, 0, sizeof(thr));
+	memset(arg, 0, sizeof(arg));
 
 	Do_ADBG_BeginSubCase(c, "Stressing with %d threads", NUM_THREADS);
 
@@ -550,7 +565,7 @@ ADBG_CASE_DEFINE(regression, 2002, xtest_tee_test_2002,
 
 static bool test_2003_accept_cb(void *ptr, int fd, short *events)
 {
-	int val;
+	int val = 0;
 
 	(void)ptr;
 	(void)events;
@@ -564,15 +579,19 @@ static bool test_2003_accept_cb(void *ptr, int fd, short *events)
 static void xtest_tee_test_2003(ADBG_Case_t *c)
 {
 	struct sock_server ts;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	uint32_t proto_error;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+	uint32_t proto_error = 0;
 	struct socket_handle sh;
-	void *buf;
+	void *buf = NULL;
 	const size_t blen0 = 16 * 1024;
-	size_t blen;
-	uint32_t val;
+	size_t blen = 0;
+	uint32_t val = 0;
 	struct sock_io_cb cb = { .accept = test_2003_accept_cb };
+
+	memset(&ts, 0, sizeof(ts));
+	memset(&session, 0, sizeof(session));
+	memset(&sh, 0, sizeof(sh));
 
 	Do_ADBG_BeginSubCase(c, "Start server");
 	if (!ADBG_EXPECT_TRUE(c, sock_server_init_tcp(&ts, &cb)))
@@ -608,7 +627,7 @@ static void xtest_tee_test_2003(ADBG_Case_t *c)
 
 	Do_ADBG_BeginSubCase(c, "TCP Socket send (10 ms timeout)");
 	while (true) {
-		TEE_Result res;
+		TEE_Result res = TEE_ERROR_GENERIC;
 
 		blen = blen0;
 		memset(buf, 0, blen0);
@@ -651,10 +670,12 @@ static bool test_200x_udp_accept_cb(void *ptr, int fd, short *events)
 	struct sockaddr_storage sass;
 	struct sockaddr *sa = (struct sockaddr *)&sass;
 	socklen_t slen = sizeof(sass);
-	uint8_t buf[100];
-	uint8_t buf2[100];
-	ssize_t r;
-	size_t l;
+	uint8_t buf[100] = { 0 };
+	uint8_t buf2[100] = { 0 };
+	ssize_t r = 0;
+	size_t l = 0;
+
+	memset(&sass, 0, sizeof(sass));
 
 	(void)events;
 
@@ -679,20 +700,28 @@ static void xtest_tee_test_2004(ADBG_Case_t *c)
 	bool ts_inited = false;
 	bool ts2_inited = false;
 	bool ts3_inited = false;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	uint32_t proto_error;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+	uint32_t proto_error = 0;
 	struct socket_handle sh;
-	uint8_t buf[64];
-	uint8_t buf2[64];
-	size_t blen;
-	uint16_t port;
+	uint8_t buf[64] = { 0 };
+	uint8_t buf2[64] = { 0 };
+	size_t blen = 0;
+	uint16_t port = 0;
 	struct test_200x_io_state server_iostate;
 	struct test_200x_io_state local_iostate;
 	struct sock_io_cb cb = {
 		.accept = test_200x_udp_accept_cb,
 		.ptr = &server_iostate,
 	};
+
+	memset(&ts, 0, sizeof(ts));
+	memset(&ts2, 0, sizeof(ts2));
+	memset(&ts3, 0, sizeof(ts3));
+	memset(&session, 0, sizeof(session));
+	memset(&sh, 0, sizeof(sh));
+	memset(&server_iostate, 0, sizeof(server_iostate));
+	memset(&local_iostate, 0, sizeof(local_iostate));
 
 	test_200x_init_io_state(&server_iostate, 1, 2);
 	test_200x_init_io_state(&local_iostate, 2, 1);
