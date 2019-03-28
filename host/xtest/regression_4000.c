@@ -2069,12 +2069,12 @@ void run_xtest_tee_test_4211(ADBG_Case_t *c, CK_SLOT_ID slot)
 		CK_ULONG attr_count = 0;
 
 		if (get_ck_mac_case(n, &mechanism, &ck_key, &attr_count)) {
-			Do_ADBG_Log("Skip case %u algo 0x%x",
+			Do_ADBG_Log("Skip case %zu algo 0x%x",
 				    n, (unsigned int)mac_cases[n].algo);
 			continue;
 		}
 
-		Do_ADBG_BeginSubCase(c, "MAC case %u algo 0x%x (%s)",
+		Do_ADBG_BeginSubCase(c, "MAC case %zu algo 0x%x (%s)",
 				     n, (unsigned int)mac_cases[n].algo,
 				     ckm2str(mechanism->mechanism));
 
@@ -2798,9 +2798,9 @@ static void xtest_tee_test_4003(ADBG_Case_t *c)
 		size_t op_key_size;
 
 
-		Do_ADBG_BeginSubCase(c, "Cipher case %d algo 0x%x line %d",
-				     (int)n, (unsigned int)ciph_cases[n].algo,
-				     (int)ciph_cases[n].line);
+		Do_ADBG_BeginSubCase(c, "Cipher case %zu algo 0x%x line %zu",
+				     n, (unsigned int)ciph_cases[n].algo,
+				     ciph_cases[n].line);
 
 		key_attr.attributeID = TEE_ATTR_SECRET_VALUE;
 		key_attr.content.ref.buffer = (void *)ciph_cases[n].key1;
@@ -3081,16 +3081,16 @@ void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot)
 		CK_ULONG attr_count = 0;
 
 		if (get_ck_ciph_case(n, &mechanism, &ck_key, &attr_count)) {
-			Do_ADBG_Log("Skip case %u algo 0x%x line %u",
+			Do_ADBG_Log("Skip case %zu algo 0x%x line %zu",
 				    n, (unsigned int)ciph_cases[n].algo,
-				    (unsigned int)ciph_cases[n].line);
+				    ciph_cases[n].line);
 			continue;
 		}
 
-		Do_ADBG_BeginSubCase(c, "Cipher case %u algo 0x%x (%s) line %u",
+		Do_ADBG_BeginSubCase(c, "Cipher case %zu algo 0x%x (%s) line %zu",
 					n, (unsigned int)ciph_cases[n].algo,
 					ckm2str(mechanism->mechanism),
-					(unsigned int)ciph_cases[n].line);
+					ciph_cases[n].line);
 		close_subcase = 1;
 
 		rv = C_CreateObject(session, ck_key, attr_count, &key_handle);
@@ -3327,9 +3327,9 @@ static void xtest_tee_test_4005(ADBG_Case_t *c)
 		return;
 
 	for (n = 0; n < ARRAY_SIZE(ae_cases); n++) {
-		Do_ADBG_BeginSubCase(c, "AE case %d algo 0x%x line %d",
-				     (int)n, (unsigned int)ae_cases[n].algo,
-				     (int)ae_cases[n].line);
+		Do_ADBG_BeginSubCase(c, "AE case %zu algo 0x%x line %zu",
+				     n, (unsigned int)ae_cases[n].algo,
+				     ae_cases[n].line);
 
 		key_attr.attributeID = TEE_ATTR_SECRET_VALUE;
 		key_attr.content.ref.buffer = (void *)ae_cases[n].key;
@@ -3630,12 +3630,12 @@ void run_xtest_tee_test_4212(ADBG_Case_t *c, CK_SLOT_ID slot)
 		if (!mechanism || !ck_key)
 			continue;
 
-		Do_ADBG_BeginSubCase(c, "AE case %d algo 0x%x (%s) %s line %d",
-				     (int)n, (unsigned int)ae_cases[n].algo,
+		Do_ADBG_BeginSubCase(c, "AE case %zu algo 0x%x (%s) %s line %zu",
+				     n, (unsigned int)ae_cases[n].algo,
 				     ckm2str(mechanism->mechanism),
 				     (ae_cases[n].mode == TEE_MODE_ENCRYPT) ?
 				     "encrypt" : "decrypt",
-				     (int)ae_cases[n].line);
+				     ae_cases[n].line);
 
 		close_subcase = 1;
 		test = &ae_cases[n];
@@ -4740,9 +4740,9 @@ static void xtest_tee_test_4006(ADBG_Case_t *c)
 		if (tv->level > level)
 			continue;
 
-		Do_ADBG_BeginSubCase(c, "Asym Crypto case %d algo 0x%x line %d",
-				     (int)n, (unsigned int)tv->algo,
-				     (int)tv->line);
+		Do_ADBG_BeginSubCase(c, "Asym Crypto case %zu algo 0x%x line %zu",
+				     n, (unsigned int)tv->algo,
+				     tv->line);
 
 		/*
 		 * When signing or verifying we're working with the hash of
@@ -5458,9 +5458,9 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 	        if (tee_alg2ckmt(tv->algo, &mechanism)) {
 			unsigned int algo = TEE_ALG_GET_MAIN_ALG(tv->algo);
 
-			Do_ADBG_Log("Skip test case %d algo 0x%x line %d (%s)",
-				     (int)n, (unsigned int)tv->algo,
-				     (int)tv->line,
+			Do_ADBG_Log("Skip test case %zu algo 0x%x line %zu (%s)",
+				     n, (unsigned int)tv->algo,
+				     tv->line,
 				     algo == TEE_MAIN_ALGO_RSA ? "RSA" :
 				     algo == TEE_MAIN_ALGO_DSA ? "DSA" :
 				     algo == TEE_MAIN_ALGO_DH ? "DH" :
@@ -5478,9 +5478,9 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 				tv->params.rsa.salt_len;
 		}
 
-		Do_ADBG_BeginSubCase(c, "Asym Crypto case %d algo 0x%x line %d (%s)",
-				     (int)n, (unsigned int)tv->algo,
-				     (int)tv->line,
+		Do_ADBG_BeginSubCase(c, "Asym Crypto case %zu algo 0x%x line %zu (%s)",
+				     n, (unsigned int)tv->algo,
+				     tv->line,
 				     ckm2str(mechanism.mechanism));
 		subcase = 1;
 
