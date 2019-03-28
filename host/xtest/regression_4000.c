@@ -6135,7 +6135,6 @@ static void keygen_noparams(ADBG_Case_t *c, TEEC_Session *session,
 					[n].key_type, 1, key_size, NULL, 0)))
 				break;
 		}
-
 		Do_ADBG_EndSubCase(c, "Generate %s key", key_types[n].name);
 	}
 }
@@ -6479,8 +6478,8 @@ static void xtest_tee_test_4007_dh(ADBG_Case_t *c)
 	};
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
-			xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
-						&ret_orig)))
+		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+					&ret_orig)))
 		return;
 
 	for (n = 0; n < ARRAY_SIZE(key_types); n++) {
@@ -6536,10 +6535,10 @@ ADBG_CASE_DEFINE(regression, 4007_dh, xtest_tee_test_4007_dh,
 
 static void xtest_tee_test_4007_dsa(ADBG_Case_t *c)
 {
-	TEEC_Session session;
-	uint32_t ret_orig = 0;
-	size_t n = 0;
-	size_t param_count = 0;
+	TEEC_Session session = { 0 };
+	uint32_t ret_orig;
+	size_t n;
+	size_t param_count;
 	TEE_Attribute params[4];
 
 #define XTEST_DSA_GK_DATA(vect) \
@@ -6568,12 +6567,9 @@ static void xtest_tee_test_4007_dsa(ADBG_Case_t *c)
 		{ 1, 1024, XTEST_DSA_GK_DATA(keygen_dsa1024) },
 	};
 
-	memset(&session, 0, sizeof(session));
-	memset(params, 0, sizeof(params));
-
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
-			xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
-						&ret_orig)))
+		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+					&ret_orig)))
 		return;
 
 	for (n = 0; n < ARRAY_SIZE(key_types); n++) {
@@ -6612,10 +6608,10 @@ ADBG_CASE_DEFINE(regression, 4007_dsa, xtest_tee_test_4007_dsa,
 
 static void xtest_tee_test_4007_ecc(ADBG_Case_t *c)
 {
-	TEEC_Session session;
-	uint32_t ret_orig = 0;
-	size_t n = 0;
-	size_t param_count = 0;
+	TEEC_Session session = { 0 };
+	uint32_t ret_orig;
+	size_t n;
+	size_t param_count;
 	TEE_Attribute params[4];
 
 	static const struct {
@@ -6649,9 +6645,6 @@ static void xtest_tee_test_4007_ecc(ADBG_Case_t *c)
 	{ 1, "ECDH-521", TEE_TYPE_ECDH_KEYPAIR, TEE_ECC_CURVE_NIST_P521,
 		521 },
 	};
-
-	memset(&session, 0, sizeof(session));
-	memset(params, 0, sizeof(params));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -7214,18 +7207,28 @@ static void xtest_tee_test_4011(ADBG_Case_t *c)
 				out, out_size, tmp, &tmp_size)))
 			goto out;
 
+		if (!ADBG_EXPECT_COMPARE_UNSIGNED(c, tmp_size, <=, sizeof(tmp)))
+			goto out;
+
 		/* 4.1 */
-		for (n = 0; n < tmp_size; n++)
+		for (n = 0; n < tmp_size - i; n++)
 			if (tmp[n] == 0xff)
 				break;
+
+		/* Shall find at least a padding start before buffer end */
+	        if (!ADBG_EXPECT_COMPARE_UNSIGNED(c, n, <, tmp_size - i - 1))
+			goto out;
+
 		for (m = n + 1; m < tmp_size; m++)
 			if (tmp[m] != 0xff)
 				break;
+
 		/* 4.2 */
 		memmove(tmp + n + i, tmp + m, tmp_size - m);
+
 		/* 4.3 */
-		for (n = n + tmp_size - m + i; n < tmp_size; n++)
-			tmp[n] = 0;
+		n = n + i + tmp_size - m;
+		memset(tmp + n, 0, tmp_size - n);
 
 		/* 5 */
 		out_size = sizeof(out);
