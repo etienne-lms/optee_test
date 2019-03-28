@@ -51,8 +51,8 @@ struct xtest_crypto_session {
 
 static void xtest_crypto_test(struct xtest_crypto_session *cs)
 {
-	uint32_t ret_orig;
-	uint8_t crypt_out[16];
+	uint32_t ret_orig = 0;
+	uint8_t crypt_out[16] = { 0 };
 	uint8_t crypt_in[16] = { 22, 17 };
 
 	crypt_in[15] = 60;
@@ -81,7 +81,7 @@ static void xtest_crypto_test(struct xtest_crypto_session *cs)
 	Do_ADBG_BeginSubCase(cs->c, "AES decrypt");
 	{
 		TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-		uint8_t out[16];
+		uint8_t out[16] = { 0 };
 
 		op.params[0].tmpref.buffer = crypt_out;
 		op.params[0].tmpref.size = sizeof(crypt_out);
@@ -160,7 +160,7 @@ static void xtest_crypto_test(struct xtest_crypto_session *cs)
 			0xE9, 0xC3, 0xEF, 0x8A, 0xB2, 0x34, 0x53, 0xE6,
 			0xF0, 0x74, 0x9C, 0xD6, 0x36, 0xE7, 0xA8, 0x8E
 		};
-		uint8_t out[sizeof(exp_out)];
+		uint8_t out[sizeof(exp_out)] = { 0 };
 
 		op.params[0].tmpref.buffer = (void *)in;
 		op.params[0].tmpref.size = sizeof(in);
@@ -202,7 +202,7 @@ static void xtest_crypto_test(struct xtest_crypto_session *cs)
 			0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17,
 			0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
 		};
-		uint8_t out[sizeof(exp_out)];
+		uint8_t out[sizeof(exp_out)] = { 0 };
 
 		op.params[0].tmpref.buffer = (void *)in;
 		op.params[0].tmpref.size = sizeof(in);
@@ -232,9 +232,11 @@ static void xtest_crypto_test(struct xtest_crypto_session *cs)
 
 static void xtest_tee_test_1001(ADBG_Case_t *c)
 {
-	TEEC_Result res;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	/* Pseudo TA is optional: warn and nicely exit if not found */
 	res = xtest_teec_open_session(&session, &pta_invoke_tests_ta_uuid, NULL,
@@ -253,13 +255,15 @@ ADBG_CASE_DEFINE(regression, 1001, xtest_tee_test_1001, "Core self tests");
 
 static void xtest_tee_test_1002(ADBG_Case_t *c)
 {
-	TEEC_Result res;
-	TEEC_Session session = { 0 };
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
-	uint8_t buf[16 * 1024];
+	uint32_t ret_orig = 0;
+	uint8_t buf[16 * 1024] = { 0 };
 	uint8_t exp_sum = 0;
-	size_t n;
+	size_t n = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	/* Pseudo TA is optional: warn and nicely exit if not found */
 	res = xtest_teec_open_session(&session, &pta_invoke_tests_ta_uuid, NULL,
@@ -304,9 +308,11 @@ struct test_1003_arg {
 static void *test_1003_thread(void *arg)
 {
 	struct test_1003_arg *a = arg;
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	size_t rounds = 64 * 1024;
-	size_t n;
+	size_t n = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	a->res = xtest_teec_open_session(&session, &pta_invoke_tests_ta_uuid,
 					 NULL, &a->error_orig);
@@ -352,9 +358,9 @@ static void *test_1003_thread(void *arg)
 static void xtest_tee_test_1003(ADBG_Case_t *c)
 {
 	size_t num_threads = 3 * 2;
-	TEEC_Result res;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
 	size_t repeat = 20;
 	pthread_t thr[num_threads];
 	struct test_1003_arg arg[num_threads];
@@ -362,12 +368,16 @@ static void xtest_tee_test_1003(ADBG_Case_t *c)
 	size_t max_read_waiters = 0;
 	size_t num_concurrent_read_lockers = 0;
 	size_t num_concurrent_read_waiters = 0;
-	size_t n;
+	size_t n = 0;
 	size_t nt = num_threads;
-	double mean_read_concurrency;
-	double mean_read_waiters;
+	double mean_read_concurrency = 0;
+	double mean_read_waiters = 0;
 	size_t num_writers = 0;
 	size_t num_readers = 0;
+
+	memset(&session, 0, sizeof(session));
+	memset(thr, 0, sizeof(thr));
+	memset(arg, 0, sizeof(arg));
 
 	/* Pseudo TA is optional: warn and nicely exit if not found */
 	res = xtest_teec_open_session(&session, &pta_invoke_tests_ta_uuid, NULL,
@@ -378,8 +388,6 @@ static void xtest_tee_test_1003(ADBG_Case_t *c)
 	}
 	ADBG_EXPECT_TEEC_SUCCESS(c, res);
 	TEEC_CloseSession(&session);
-
-	memset(arg, 0, sizeof(arg));
 
 	for (n = 0; n < nt; n++) {
 		if (n % 3) {
@@ -430,11 +438,13 @@ ADBG_CASE_DEFINE(regression, 1003, xtest_tee_test_1003,
 
 static void xtest_tee_test_1004(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
 	struct xtest_crypto_session cs = { c, &session, TA_CRYPT_CMD_SHA256,
 					   TA_CRYPT_CMD_AES256ECB_ENC,
 					   TA_CRYPT_CMD_AES256ECB_DEC };
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, xtest_teec_open_session(
 					      &session, &crypt_user_ta_uuid,
@@ -450,9 +460,11 @@ ADBG_CASE_DEFINE(regression, 1004, xtest_tee_test_1004, "Test User Crypt TA");
 
 static void xtest_tee_test_invalid_mem_access(ADBG_Case_t *c, unsigned int n)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &os_test_ta_uuid, NULL,
@@ -481,12 +493,14 @@ static void xtest_tee_test_invalid_mem_access(ADBG_Case_t *c, unsigned int n)
 static void xtest_tee_test_invalid_mem_access2(ADBG_Case_t *c, unsigned int n,
 							       size_t size)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 	TEEC_SharedMemory shm;
 
+	memset(&session, 0, sizeof(session));
 	memset(&shm, 0, sizeof(shm));
+
 	shm.size = size;
 	shm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -521,10 +535,12 @@ static void xtest_tee_test_invalid_mem_access2(ADBG_Case_t *c, unsigned int n,
 
 static void xtest_tee_test_1005(ADBG_Case_t *c)
 {
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 #define MAX_SESSIONS    3
 	TEEC_Session sessions[MAX_SESSIONS];
-	int i;
+	int i = 0;
+
+	memset(sessions, 0, sizeof(sessions));
 
 	for (i = 0; i < MAX_SESSIONS; i++) {
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -541,10 +557,12 @@ ADBG_CASE_DEFINE(regression, 1005, xtest_tee_test_1005, "Many sessions");
 
 static void xtest_tee_test_1006(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint8_t buf[32];
+	uint8_t buf[32] = { 0 };
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &os_test_ta_uuid, NULL,
@@ -567,8 +585,10 @@ ADBG_CASE_DEFINE(regression, 1006, xtest_tee_test_1006,
 
 static void xtest_tee_test_1007(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &os_test_ta_uuid, NULL,
@@ -604,7 +624,7 @@ ADBG_CASE_DEFINE(regression, 1007, xtest_tee_test_1007, "Test Panic");
 
 static FILE *open_ta_file(const TEEC_UUID *uuid, const char *mode)
 {
-	char buf[PATH_MAX];
+	char buf[PATH_MAX] = { 0 };
 
 	snprintf(buf, sizeof(buf),
 		"%s/%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x.ta",
@@ -619,16 +639,18 @@ static FILE *open_ta_file(const TEEC_UUID *uuid, const char *mode)
 
 static bool load_corrupt_ta(ADBG_Case_t *c, size_t offs, uint8_t mask)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 	TEEC_UUID uuid = PTA_SECSTOR_TA_MGMT_UUID;
-	TEEC_Result res;
-	uint32_t ret_orig;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	uint32_t ret_orig = 0;
 	FILE *f = NULL;
 	bool r = false;
 	uint8_t *buf = NULL;
-	size_t sz;
-	size_t fread_res;
+	size_t sz = 0;
+	size_t fread_res = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &uuid, NULL, &ret_orig)))
@@ -674,9 +696,12 @@ out:
 
 static void xtest_tee_test_1008(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	TEEC_Session session_crypt = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	TEEC_Session session_crypt;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
+	memset(&session_crypt, 0, sizeof(session_crypt));
 
 	Do_ADBG_BeginSubCase(c, "Invoke command");
 	{
@@ -718,7 +743,7 @@ static void xtest_tee_test_1008(ADBG_Case_t *c)
 
 	Do_ADBG_BeginSubCase(c, "Create session fail");
 	{
-		size_t n;
+		size_t n = 0;
 
 		(void)ADBG_EXPECT_TEEC_RESULT(c, TEEC_ERROR_GENERIC,
 			xtest_teec_open_session(&session_crypt,
@@ -777,9 +802,12 @@ static void *cancellation_thread(void *arg)
 static void xtest_tee_test_1009_subcase(ADBG_Case_t *c, const char *subcase,
                                         uint32_t timeout, bool cancel)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
 	pthread_t thr;
+
+	memset(&session, 0, sizeof(session));
+	memset(&thr, 0, sizeof(thr));
 
 	Do_ADBG_BeginSubCase(c, "%s", subcase);
 	{
@@ -835,8 +863,8 @@ ADBG_CASE_DEFINE(regression, 1009, xtest_tee_test_1009, "TEE Wait");
 
 static void xtest_tee_test_1010(ADBG_Case_t *c)
 {
-	unsigned int n;
-	unsigned int idx;
+	unsigned int n = 0;
+	unsigned int idx = 0;
 	size_t memref_sz[] = { 1024, 65536 };
 
 	for (n = 1; n <= 5; n++) {
@@ -862,8 +890,8 @@ ADBG_CASE_DEFINE(regression, 1010, xtest_tee_test_1010,
 
 static void xtest_tee_test_1011(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
 	struct xtest_crypto_session cs = {
 		c, &session, TA_RPC_CMD_CRYPT_SHA256,
 		TA_RPC_CMD_CRYPT_AES256ECB_ENC,
@@ -876,6 +904,8 @@ static void xtest_tee_test_1011(ADBG_Case_t *c)
 		TA_RPC_CMD_CRYPT_PRIVMEM_AES256ECB_DEC
 	};
 	TEEC_UUID uuid = rpc_test_ta_uuid;
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &uuid, NULL, &ret_orig)))
@@ -911,10 +941,13 @@ ADBG_CASE_DEFINE(regression, 1011, xtest_tee_test_1011,
  */
 static void xtest_tee_test_1012(ADBG_Case_t *c)
 {
-	TEEC_Session session1 = { 0 };
-	TEEC_Session session2 = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session1;
+	TEEC_Session session2;
+	uint32_t ret_orig = 0;
 	TEEC_UUID uuid = sims_test_ta_uuid;
+
+	memset(&session1, 0, sizeof(session1));
+	memset(&session2, 0, sizeof(session2));
 
 	Do_ADBG_BeginSubCase(c, "Single Instance Multi Session");
 	{
@@ -926,7 +959,7 @@ static void xtest_tee_test_1012(ADBG_Case_t *c)
 			0xF0, 0x74, 0x9C, 0xD6, 0x36, 0xE7, 0xA8, 0x8E
 		};
 		uint8_t out[32] = { 0 };
-		int i;
+		int i = 0;
 
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			xtest_teec_open_session(&session1, &uuid, NULL,
@@ -1031,10 +1064,12 @@ struct test_1013_thread_arg {
 static void *test_1013_thread(void *arg)
 {
 	struct test_1013_thread_arg *a = arg;
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 	uint8_t p2 = TEEC_NONE;
 	uint8_t p3 = TEEC_NONE;
+
+	memset(&session, 0, sizeof(session));
 
 	a->res = xtest_teec_open_session(&session, a->uuid, NULL,
 					 &a->error_orig);
@@ -1072,12 +1107,12 @@ static void xtest_tee_test_1013_single(ADBG_Case_t *c, double *mean_concurrency,
 				       const TEEC_UUID *uuid)
 {
 	size_t num_threads = NUM_THREADS;
-	size_t nt;
-	size_t n;
+	size_t nt = 0;
+	size_t n = 0;
 	size_t repeat = 1000;
 	pthread_t thr[num_threads];
 	TEEC_SharedMemory shm;
-	size_t max_concurrency;
+	size_t max_concurrency = 0;
 	struct test_1013_thread_arg arg[num_threads];
 	static const uint8_t sha256_in[] = { 'a', 'b', 'c' };
 	static const uint8_t sha256_out[] = {
@@ -1088,10 +1123,13 @@ static void xtest_tee_test_1013_single(ADBG_Case_t *c, double *mean_concurrency,
 	};
 	uint8_t out[32] = { 0 };
 
+	memset(thr, 0, sizeof(thr));
+	memset(&shm, 0, sizeof(shm));
+	memset(arg, 0, sizeof(arg));
+
 	Do_ADBG_BeginSubCase(c, "Busy loop repeat %zu", repeat * 10);
 	*mean_concurrency = 0;
 
-	memset(&shm, 0, sizeof(shm));
 	shm.size = sizeof(struct ta_concurrent_shm);
 	shm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -1099,7 +1137,6 @@ static void xtest_tee_test_1013_single(ADBG_Case_t *c, double *mean_concurrency,
 		return;
 
 	memset(shm.buffer, 0, shm.size);
-	memset(arg, 0, sizeof(arg));
 	max_concurrency = 0;
 	nt = num_threads;
 
@@ -1168,9 +1205,9 @@ static void xtest_tee_test_1013_single(ADBG_Case_t *c, double *mean_concurrency,
 
 static void xtest_tee_test_1013(ADBG_Case_t *c)
 {
-	int i;
-	double mean_concurrency;
-	double concurrency;
+	int i = 0;
+	double mean_concurrency = 0;
+	double concurrency = 0;
 	int nb_loops = 24;
 
 	if (level == 0)
@@ -1216,8 +1253,8 @@ static void xtest_tee_test_1014(ADBG_Case_t *c)
 	int loop = 10;
 	int ion_heap = DEFAULT_ION_HEAP_TYPE;
 	int rnd_offset = 1;
-	int test;
-	int ret;
+	int test = 0;
+	int ret = 0;
 
 	test = TEST_NS_TO_TA;
 	Do_ADBG_BeginSubCase(c, "SDP: NonSecure client invokes a SDP TA");
@@ -1249,9 +1286,11 @@ ADBG_CASE_DEFINE(regression, 1014, xtest_tee_test_1014,
 
 static void xtest_tee_test_1015(ADBG_Case_t *c)
 {
-	TEEC_Result res;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	/* Pseudo TA is optional: warn and nicely exit if not found */
 	res = xtest_teec_open_session(&session, &pta_invoke_tests_ta_uuid, NULL,
@@ -1272,9 +1311,11 @@ ADBG_CASE_DEFINE(regression, 1015, xtest_tee_test_1015,
 
 static void xtest_tee_test_1016(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &os_test_ta_uuid, NULL,
@@ -1295,13 +1336,15 @@ ADBG_CASE_DEFINE(regression, 1016, xtest_tee_test_1016,
 
 static void xtest_tee_test_1017(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 	TEEC_SharedMemory shm;
 	size_t page_size = 4096;
 
+	memset(&session, 0, sizeof(session));
 	memset(&shm, 0, sizeof(shm));
+
 	shm.size = 8 * page_size;
 	shm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -1352,13 +1395,15 @@ ADBG_CASE_DEFINE(regression, 1017, xtest_tee_test_1017,
 
 static void xtest_tee_test_1018(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 	TEEC_SharedMemory shm;
 	size_t page_size = 4096;
 
+	memset(&session, 0, sizeof(session));
 	memset(&shm, 0, sizeof(shm));
+
 	shm.size = 8 * page_size;
 	shm.flags = TEEC_MEM_INPUT | TEEC_MEM_OUTPUT;
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -1415,8 +1460,10 @@ ADBG_CASE_DEFINE(regression, 1018, xtest_tee_test_1018,
 #if defined(CFG_TA_DYNLINK)
 static void xtest_tee_test_1019(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &os_test_ta_uuid, NULL,
@@ -1442,9 +1489,11 @@ ADBG_CASE_DEFINE(regression, 1019, xtest_tee_test_1019,
 
 static void xtest_tee_test_1020(ADBG_Case_t *c)
 {
-	TEEC_Result res;
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
 
 	/* Pseudo TA is optional: warn and nicely exit if not found */
 	res = xtest_teec_open_session(&session, &pta_invoke_tests_ta_uuid, NULL,

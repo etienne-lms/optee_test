@@ -113,8 +113,8 @@ static TEEC_Result fs_open(TEEC_Session *sess, void *id, uint32_t id_size,
 			   uint32_t flags, uint32_t *obj, uint32_t storage_id)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	TEEC_Result res;
-	uint32_t org;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	uint32_t org = 0;
 
 	op.params[0].tmpref.buffer = id;
 	op.params[0].tmpref.size = id_size;
@@ -140,8 +140,8 @@ static TEEC_Result fs_create(TEEC_Session *sess, void *id, uint32_t id_size,
 			     uint32_t storage_id)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	TEEC_Result res;
-	uint32_t org;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	uint32_t org = 0;
 
 	op.params[0].tmpref.buffer = id;
 	op.params[0].tmpref.size = id_size;
@@ -168,8 +168,8 @@ static TEEC_Result fs_create_overwrite(TEEC_Session *sess, void *id,
 				       uint32_t id_size, uint32_t storage_id)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	TEEC_Result res;
-	uint32_t org;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	uint32_t org = 0;
 
 	op.params[0].tmpref.buffer = id;
 	op.params[0].tmpref.size = id_size;
@@ -187,7 +187,7 @@ static TEEC_Result fs_create_overwrite(TEEC_Session *sess, void *id,
 static TEEC_Result fs_close(TEEC_Session *sess, uint32_t obj)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 
@@ -200,9 +200,9 @@ static TEEC_Result fs_close(TEEC_Session *sess, uint32_t obj)
 static TEEC_Result fs_read(TEEC_Session *sess, uint32_t obj, void *data,
 			   uint32_t data_size, uint32_t *count)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].tmpref.buffer = data;
 	op.params[0].tmpref.size = data_size;
@@ -225,7 +225,7 @@ static TEEC_Result fs_write(TEEC_Session *sess, uint32_t obj, void *data,
 			    uint32_t data_size)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].tmpref.buffer = data;
 	op.params[0].tmpref.size = data_size;
@@ -243,7 +243,7 @@ static TEEC_Result fs_seek(TEEC_Session *sess, uint32_t obj, int32_t offset,
 			   int32_t whence)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 	op.params[0].value.b = *(uint32_t *)&offset;
@@ -258,7 +258,7 @@ static TEEC_Result fs_seek(TEEC_Session *sess, uint32_t obj, int32_t offset,
 static TEEC_Result fs_unlink(TEEC_Session *sess, uint32_t obj)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 
@@ -271,7 +271,7 @@ static TEEC_Result fs_unlink(TEEC_Session *sess, uint32_t obj)
 static TEEC_Result fs_trunc(TEEC_Session *sess, uint32_t obj, uint32_t len)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 	op.params[0].value.b = len;
@@ -286,7 +286,7 @@ static TEEC_Result fs_rename(TEEC_Session *sess, uint32_t obj, void *id,
 			     uint32_t id_size)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 	op.params[1].tmpref.buffer = id;
@@ -301,9 +301,9 @@ static TEEC_Result fs_rename(TEEC_Session *sess, uint32_t obj, void *id,
 
 static TEEC_Result fs_alloc_enum(TEEC_Session *sess, uint32_t *e)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_OUTPUT, TEEC_NONE,
 					 TEEC_NONE, TEEC_NONE);
@@ -318,9 +318,9 @@ static TEEC_Result fs_alloc_enum(TEEC_Session *sess, uint32_t *e)
 
 static TEEC_Result fs_reset_enum(TEEC_Session *sess, uint32_t e)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_NONE,
 					 TEEC_NONE, TEEC_NONE);
@@ -334,7 +334,7 @@ static TEEC_Result fs_reset_enum(TEEC_Session *sess, uint32_t e)
 static TEEC_Result fs_free_enum(TEEC_Session *sess, uint32_t e)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_NONE, TEEC_NONE,
 					 TEEC_NONE);
@@ -348,7 +348,7 @@ static TEEC_Result fs_start_enum(TEEC_Session *sess, uint32_t e,
 				 uint32_t storage_id)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_NONE,
 					 TEEC_NONE, TEEC_NONE);
@@ -363,7 +363,7 @@ static TEEC_Result fs_next_enum(TEEC_Session *sess, uint32_t e, void *obj_info,
 				size_t info_size, void *id, uint32_t id_size)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT, TEEC_NONE,
 					 TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE);
@@ -383,7 +383,7 @@ static TEEC_Result fs_restrict_usage(TEEC_Session *sess, uint32_t obj,
 				     uint32_t obj_usage)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 	op.params[0].value.b = obj_usage;
@@ -398,9 +398,9 @@ static TEEC_Result fs_restrict_usage(TEEC_Session *sess, uint32_t obj,
 static TEEC_Result fs_alloc_obj(TEEC_Session *sess, uint32_t obj_type,
 				     uint32_t max_key_size, uint32_t *obj)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj_type;
 	op.params[0].value.b = max_key_size;
@@ -416,7 +416,7 @@ static TEEC_Result fs_alloc_obj(TEEC_Session *sess, uint32_t obj_type,
 static TEEC_Result fs_free_obj(TEEC_Session *sess, uint32_t obj)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 
@@ -429,7 +429,7 @@ static TEEC_Result fs_free_obj(TEEC_Session *sess, uint32_t obj)
 static TEEC_Result fs_reset_obj(TEEC_Session *sess, uint32_t obj)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.params[0].value.a = obj;
 
@@ -443,7 +443,7 @@ static TEEC_Result fs_get_obj_info(TEEC_Session *sess, uint32_t obj,
 				void *obj_info, size_t info_size)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t org;
+	uint32_t org = 0;
 
 	op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INPUT,
 					TEEC_MEMREF_TEMP_OUTPUT,
@@ -463,7 +463,9 @@ static void test_truncate_file_length(ADBG_Case_t *c, uint32_t storage_id)
 	uint32_t obj = 0;
 	uint8_t out[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -499,7 +501,7 @@ static void test_truncate_file_length(ADBG_Case_t *c, uint32_t storage_id)
 		goto exit;
 
 	/* open */
-	if (!ADBG_EXPECT_TEEC_SUCCESS(c, fs_open(&sess,  file_01, sizeof(file_01),
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c, fs_open(&sess, file_01, sizeof(file_01),
 			TEE_DATA_FLAG_ACCESS_WRITE |
 			TEE_DATA_FLAG_ACCESS_READ |
 			TEE_DATA_FLAG_ACCESS_WRITE_META, &obj, storage_id)))
@@ -533,7 +535,9 @@ static void test_extend_file_length(ADBG_Case_t *c, uint32_t storage_id)
 	uint8_t out[10] = { 0 };
 	uint8_t expect[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -571,7 +575,7 @@ static void test_extend_file_length(ADBG_Case_t *c, uint32_t storage_id)
 		goto exit;
 
 	/* open */
-	if (!ADBG_EXPECT_TEEC_SUCCESS(c, fs_open(&sess,  file_01, sizeof(file_01),
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c, fs_open(&sess, file_01, sizeof(file_01),
 			TEE_DATA_FLAG_ACCESS_WRITE |
 			TEE_DATA_FLAG_ACCESS_READ |
 			TEE_DATA_FLAG_ACCESS_WRITE_META, &obj, storage_id)))
@@ -607,7 +611,9 @@ static void test_file_hole(ADBG_Case_t *c, uint32_t storage_id)
 	uint8_t out[10] = { 0 };
 	uint8_t expect[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -653,7 +659,7 @@ static void test_file_hole(ADBG_Case_t *c, uint32_t storage_id)
 		goto exit;
 
 	/* open */
-	if (!ADBG_EXPECT_TEEC_SUCCESS(c, fs_open(&sess,  file_01, sizeof(file_01),
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c, fs_open(&sess, file_01, sizeof(file_01),
 			TEE_DATA_FLAG_ACCESS_WRITE |
 			TEE_DATA_FLAG_ACCESS_READ |
 			TEE_DATA_FLAG_ACCESS_WRITE_META, &obj, storage_id)))
@@ -686,38 +692,38 @@ exit:
 #ifdef WITH_GP_TESTS
 static TEEC_Result ds_seek_obj_inv_handle(TEEC_Session *sess)
 {
-    TEEC_Operation op;
-    uint32_t org;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org = 0;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_VALUE_INPUT, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_VALUE_INPUT, TEEC_NONE, TEEC_NONE, TEEC_NONE);
 
-    op.params[0].value.a = CASE_DATA_OBJECT_NOT_PERSISTENT;
+	op.params[0].value.a = CASE_DATA_OBJECT_NOT_PERSISTENT;
 
-    return TEEC_InvokeCommand(
-        sess, CMD_SeekObjectData_panic, &op, &org);
+	return TEEC_InvokeCommand(
+		sess, CMD_SeekObjectData_panic, &op, &org);
 }
 
 static TEEC_Result ds_seek_gp(
-    TEEC_Session *sess, TEE_Whence wh, uint32_t wh_off, uint32_t set_off,
-    void *in, size_t in_size, void *out, size_t out_size)
+	TEEC_Session *sess, TEE_Whence wh, uint32_t wh_off, uint32_t set_off,
+	void *in, size_t in_size, void *out, size_t out_size)
 {
-    TEEC_Operation op;
-    uint32_t org;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org = 0;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_VALUE_INPUT, TEEC_VALUE_INPUT, TEEC_MEMREF_TEMP_INPUT,
-        TEEC_MEMREF_TEMP_OUTPUT);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_VALUE_INPUT, TEEC_VALUE_INPUT, TEEC_MEMREF_TEMP_INPUT,
+		TEEC_MEMREF_TEMP_OUTPUT);
 
-    op.params[0].value.a = wh;
-    op.params[0].value.b = wh_off;
-    op.params[1].value.a = set_off;
-    op.params[2].tmpref.buffer = in;
-    op.params[2].tmpref.size = in_size;
-    op.params[3].tmpref.buffer = out;
-    op.params[3].tmpref.size = out_size;
+	op.params[0].value.a = wh;
+	op.params[0].value.b = wh_off;
+	op.params[1].value.a = set_off;
+	op.params[2].tmpref.buffer = in;
+	op.params[2].tmpref.size = in_size;
+	op.params[3].tmpref.buffer = out;
+	op.params[3].tmpref.size = out_size;
 
-    return TEEC_InvokeCommand(sess, CMD_SeekWriteReadObjectData, &op, &org);
+	return TEEC_InvokeCommand(sess, CMD_SeekWriteReadObjectData, &op, &org);
 }
 
 static TEEC_Result ds_init_object_and_attributes(TEEC_Session *sess,
@@ -725,79 +731,80 @@ static TEEC_Result ds_init_object_and_attributes(TEEC_Session *sess,
             size_t attr_meta_len, const void *attr_data, size_t attr_data_len,
             uint32_t option)
 {
-    TEEC_Operation op;
-    uint32_t org;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_VALUE_INPUT, TEEC_MEMREF_TEMP_INPUT,
-        TEEC_MEMREF_TEMP_INPUT, TEEC_VALUE_INPUT);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_VALUE_INPUT, TEEC_MEMREF_TEMP_INPUT,
+		TEEC_MEMREF_TEMP_INPUT, TEEC_VALUE_INPUT);
 
-    op.params[0].value.a = obj_type;
-    op.params[0].value.b = obj_size;
-    op.params[1].tmpref.buffer = (void *)attr_meta;
-    op.params[1].tmpref.size = attr_meta_len;
-    op.params[2].tmpref.buffer = (void *)attr_data;
-    op.params[2].tmpref.size = attr_data_len;
-    op.params[3].value.a = option;
+	op.params[0].value.a = obj_type;
+	op.params[0].value.b = obj_size;
+	op.params[1].tmpref.buffer = (void *)attr_meta;
+	op.params[1].tmpref.size = attr_meta_len;
+	op.params[2].tmpref.buffer = (void *)attr_data;
+	op.params[2].tmpref.size = attr_data_len;
+	op.params[3].value.a = option;
 
-    return TEEC_InvokeCommand(sess, CMD_InitObjectAndAttributes, &op, &org);
+	return TEEC_InvokeCommand(sess, CMD_InitObjectAndAttributes, &op, &org);
 }
 
 static TEEC_Result ds_rename_access_conflict(TEEC_Session *sess)
 {
-    TEEC_Operation op;
-    uint32_t org;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org = 0;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
 
-    return TEEC_InvokeCommand(
-        sess, CMD_RenamePersistentObject_AccessConflict, &op, &org);
+	return TEEC_InvokeCommand(
+		sess, CMD_RenamePersistentObject_AccessConflict, &op, &org);
 }
 
 static TEEC_Result ds_start_enum_no_item(TEEC_Session *sess)
 {
-    TEEC_Operation op;
-    uint32_t org;
-    TEEC_Result res;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org = 0;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_VALUE_OUTPUT, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_VALUE_OUTPUT, TEEC_NONE, TEEC_NONE, TEEC_NONE);
 
-    res = TEEC_InvokeCommand(
-        sess, CMD_StartNGetPersistentObjectEnumerator_itemNotFound, &op, &org);
+	res = TEEC_InvokeCommand(
+		sess, CMD_StartNGetPersistentObjectEnumerator_itemNotFound,
+		&op, &org);
 
-    if (res != TEEC_SUCCESS)
-        return res;
+	if (res != TEEC_SUCCESS)
+		return res;
 
-    if (op.params[0].value.a != 0 || op.params[0].value.b != 0)
-        return TEEC_ERROR_GENERIC;
+	if (op.params[0].value.a != 0 || op.params[0].value.b != 0)
+		return TEEC_ERROR_GENERIC;
 
-    return res;
+	return res;
 }
 
 static TEEC_Result ds_rename_success(TEEC_Session *sess)
 {
-    TEEC_Operation op;
-    uint32_t org;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org = 0;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
 
-    return TEEC_InvokeCommand(
-        sess, CMD_RenamePersistentObject_Success, &op, &org);
+	return TEEC_InvokeCommand(
+		sess, CMD_RenamePersistentObject_Success, &op, &org);
 }
 
 static TEEC_Result ds_null_close_free_reset(TEEC_Session *sess)
 {
-    TEEC_Operation op;
-    uint32_t org;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint32_t org = 0;
 
-    op.paramTypes = TEEC_PARAM_TYPES(
-        TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
+	op.paramTypes = TEEC_PARAM_TYPES(
+		TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
 
-    return TEEC_InvokeCommand(
-        sess, CMD_CloseFreeAndResetObjectSuccessHandleNull, &op, &org);
+	return TEEC_InvokeCommand(
+		sess, CMD_CloseFreeAndResetObjectSuccessHandleNull, &op, &org);
 }
 #endif
 
@@ -806,7 +813,9 @@ static void xtest_tee_test_6001_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
 	uint32_t obj = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -835,7 +844,9 @@ static void xtest_tee_test_6002_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
 	uint32_t obj = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -881,7 +892,9 @@ static void xtest_tee_test_6003_single(ADBG_Case_t *c, uint32_t storage_id)
 	uint32_t obj = 0;
 	uint8_t out[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -925,7 +938,9 @@ static void xtest_tee_test_6004_single(ADBG_Case_t *c, uint32_t storage_id)
 	uint32_t obj = 0;
 	uint8_t out[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -984,7 +999,9 @@ static void xtest_tee_test_6005_single(ADBG_Case_t *c, uint32_t storage_id)
 	uint32_t obj = 0;
 	uint8_t out[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1026,7 +1043,9 @@ static void xtest_tee_test_6006_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
 	uint32_t obj = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1080,7 +1099,9 @@ static void xtest_tee_test_6008_single(ADBG_Case_t *c, uint32_t storage_id)
 	uint32_t obj = 0;
 	uint8_t out[10] = { 0 };
 	uint32_t count = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1142,13 +1163,15 @@ ADBG_CASE_DEFINE(regression, 6008, xtest_tee_test_6008,
 static void xtest_tee_test_6009_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
-	uint32_t obj0;
-	uint32_t obj1;
-	uint32_t obj2;
+	uint32_t obj0 = 0;
+	uint32_t obj1 = 0;
+	uint32_t obj2 = 0;
 	uint32_t e = 0;
-	uint8_t info[200];
-	uint8_t id[200];
-	uint32_t orig;
+	uint8_t info[200] = { 0 };
+	uint8_t id[200] = { 0 };
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1249,14 +1272,16 @@ ADBG_CASE_DEFINE(regression, 6009, xtest_tee_test_6009,
 static void xtest_tee_test_6010_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
-	uint32_t orig;
-	uint32_t o1;
-	uint32_t o2;
-	uint32_t e;
-	uint32_t f;
-	uint8_t data[1024];
-	uint8_t out[1024];
-	uint32_t n;
+	uint32_t orig = 0;
+	uint32_t o1 = 0;
+	uint32_t o2 = 0;
+	uint32_t e = 0;
+	uint32_t f = 0;
+	uint8_t data[1024] = { 0 };
+	uint8_t out[1024] = { 0 };
+	uint32_t n = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	for (n = 0; n < ARRAY_SIZE(data); n++)
 		data[n] = n;
@@ -1477,37 +1502,43 @@ ADBG_CASE_DEFINE(regression, 6010, xtest_tee_test_6010, "Test Storage");
 #ifdef WITH_GP_TESTS
 static void xtest_tee_test_6011(ADBG_Case_t *c)
 {
-    TEEC_Session sess;
-    uint32_t orig;
-    /*
-     * Test data from
-     * Invoke_InitObjectAndAttributes_TEE_TYPE_AES_success_attribute_
-     * TEE_ATTR_SECRET_VALUE_correct_size (9d-9a-91)
-     */
-    static const uint8_t attr_meta[] = {
+	TEEC_Session sess;
+	uint32_t orig = 0;
+	/*
+	 * Test data from
+	 * Invoke_InitObjectAndAttributes_TEE_TYPE_AES_success_attribute_
+	 * TEE_ATTR_SECRET_VALUE_correct_size (9d-9a-91)
+	 */
+	static const uint8_t attr_meta[] = {
 0xc0,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-    };
-    static const uint8_t attr_data[] = {
+	};
+	static const uint8_t attr_data[] = {
 0x60,0x3d,0xeb,0x10,0x15,0xca,0x71,0xbe,0x2b,0x73,0xae,0xf0,0x85,0x7d,0x77,
 0x81,0x1f,0x35,0x2c,0x07,0x3b,0x61,0x08,0xd7,0x2d,0x98,0x10,0xa3,0x09,0x14,
 0xdf,0xf4,
-    };
+	};
+
+	memset(&sess, 0, sizeof(sess));
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(
+			c, xtest_teec_open_session(&sess, &gp_tta_ds_uuid,
+						   NULL, &orig)))
+		return;
 
     if (!ADBG_EXPECT_TEEC_SUCCESS(
-            c, xtest_teec_open_session(
-                &sess, &gp_tta_ds_uuid, NULL, &orig)))
-        return;
-
-    if (!ADBG_EXPECT_TEEC_SUCCESS(c, ds_init_object_and_attributes(&sess,
-            0xa0000010, 0x100, attr_meta, sizeof(attr_meta), attr_data,
-            sizeof(attr_data), 0)))
-        goto exit;
+			c, ds_init_object_and_attributes(&sess, 0xa0000010,
+							 0x100, attr_meta,
+							 sizeof(attr_meta),
+							 attr_data,
+							 sizeof(attr_data),
+							 0)))
+		goto exit;
 
 exit:
-    TEEC_CloseSession(&sess);
+	TEEC_CloseSession(&sess);
 }
 ADBG_CASE_DEFINE(regression, 6011, xtest_tee_test_6011,
 		 "Test TEE GP TTA DS init objects");
@@ -1516,8 +1547,10 @@ ADBG_CASE_DEFINE(regression, 6011, xtest_tee_test_6011,
 static void xtest_tee_test_6012_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
-	uint32_t orig;
+	uint32_t orig = 0;
 	uint32_t obj = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	/*
 	 * create the object a first time (forced through with overwrite attribute)
@@ -1590,8 +1623,10 @@ ADBG_CASE_DEFINE(regression, 6012, xtest_tee_test_6012,
 static void xtest_tee_test_6013_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
-	uint32_t orig;
+	uint32_t orig = 0;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1614,8 +1649,10 @@ ADBG_CASE_DEFINE(regression, 6013, xtest_tee_test_6013,
 static void xtest_tee_test_6014_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
-	uint32_t orig;
+	uint32_t orig = 0;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+
+	memset(&sess, 0, sizeof(sess));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1638,9 +1675,12 @@ static void xtest_tee_test_6015_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
 	TEEC_Session sess2;
-	uint32_t orig;
+	uint32_t orig = 0;
 	uint32_t obj = 0;
 	uint32_t obj2 = 0;
+
+	memset(&sess, 0, sizeof(sess));
+	memset(&sess2, 0, sizeof(sess2));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1742,12 +1782,13 @@ static void xtest_tee_test_6016_loop(ADBG_Case_t *c, uint32_t storage_id)
 	size_t num_threads = NUM_THREADS;
 	struct test_6016_thread_arg arg[num_threads];
 	pthread_t thr[num_threads];
-	uint32_t orig;
-	size_t i;
+	uint32_t orig = 0;
+	size_t i = 0;
 	size_t n = 0;
-	size_t m;
+	size_t m = 0;
 
 	memset(arg, 0, sizeof(arg));
+	memset(thr, 0, sizeof(thr));
 
 	for (m = 0; m < num_threads; m++)
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -1775,7 +1816,7 @@ out:
 /* concurency */
 static void xtest_tee_test_6016_single(ADBG_Case_t *c, uint32_t storage_id)
 {
-	int i;
+	int i = 0;
 	int loops = 8;
 
 	Do_ADBG_Log("    threads: %d, loops: %d", NUM_THREADS, loops);
@@ -1791,7 +1832,11 @@ static void xtest_tee_test_6017_single(ADBG_Case_t *c, uint32_t storage_id)
 	TEE_ObjectInfo obj_info1;
 	TEE_ObjectInfo obj_info2;
 	uint32_t obj = 0;
-	uint32_t orig;
+	uint32_t orig = 0;
+
+	memset(&sess, 0, sizeof(sess));
+	memset(&obj_info1, 0, sizeof(obj_info1));
+	memset(&obj_info2, 0, sizeof(obj_info2));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -1846,11 +1891,15 @@ static void xtest_tee_test_6018_single(ADBG_Case_t *c, uint32_t storage_id)
 	TEE_ObjectInfo obj_info1;
 	TEE_ObjectInfo obj_info2;
 	uint32_t obj = 0;
-	uint32_t orig;
-	uint8_t block[32 * 1024];
-	size_t num_blocks;
-	size_t block_size;
-	size_t n;
+	uint32_t orig = 0;
+	uint8_t block[32 * 1024] = { 0 };
+	size_t num_blocks = 0;
+	size_t block_size = 0;
+	size_t n = 0;
+
+	memset(&sess, 0, sizeof(sess));
+	memset(&obj_info1, 0, sizeof(obj_info1));
+	memset(&obj_info2, 0, sizeof(obj_info2));
 
 	if (storage_is(storage_id, TEE_STORAGE_PRIVATE_RPMB)) {
 		/* RPMB FS is a bit resource constrained */
@@ -1911,6 +1960,8 @@ static void xtest_tee_test_6018_single(ADBG_Case_t *c, uint32_t storage_id)
 		uint8_t br[block_size];
 		uint32_t count = 0;
 
+		memset(br, 0, sizeof(br));
+
 		memset(block, n, block_size);
 
 		Do_ADBG_Log("reading %zu", n);
@@ -1935,11 +1986,14 @@ static void xtest_tee_test_6019_single(ADBG_Case_t *c, uint32_t storage_id)
 {
 	TEEC_Session sess;
 	TEEC_Session sess2;
-	uint32_t orig;
+	uint32_t orig = 0;
 	uint32_t obj = 0;
 	uint32_t obj2 = 0;
 	uint8_t out[10] = { 0 };
 	uint32_t count = 0;
+
+	memset(&sess, 0, sizeof(sess));
+	memset(&sess2, 0, sizeof(sess2));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&sess, &storage_ta_uuid, NULL, &orig)))
@@ -2031,8 +2085,8 @@ static TEEC_Result fs_access_with_bad_object_id_ref(TEEC_Session *sess,
 						    uint32_t storage_id)
 {
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	TEEC_Result res;
-	uint32_t org;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
+	uint32_t org = 0;
 
 	switch (command) {
 	case TA_STORAGE_CMD_OPEN_ID_IN_SHM:
@@ -2101,10 +2155,12 @@ static TEEC_Result fs_access_with_bad_object_id_ref(TEEC_Session *sess,
 
 static void xtest_tee_test_6020_single(ADBG_Case_t *c, uint32_t storage_id)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Session sess;
-	uint32_t orig;
+	uint32_t orig = 0;
 	uint32_t obj = 0;
+
+	memset(&sess, 0, sizeof(sess));
 
 	/*
 	 * Invalid open request from the TA (object ID reference in SHM)
