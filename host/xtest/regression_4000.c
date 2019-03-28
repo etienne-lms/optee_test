@@ -6101,75 +6101,23 @@ bail:
 }
 #endif
 
-static const struct {
+struct key_types_noparam {
 	unsigned level;
 	const char *name;
 	uint32_t key_type;
 	uint32_t quanta;
 	uint32_t min_size;
 	uint32_t max_size;
-} keygen_noparams_key_types[] = {
-	{ 0, "AES", TEE_TYPE_AES, 64, 128,
-	  256 /* valid sizes 128, 192, 256 */ },
-	{ 0, "DES", TEE_TYPE_DES, 56, 56, 56 /* valid size 56 */ },
-	{ 0, "DES3", TEE_TYPE_DES3, 56, 112,
-	  168 /* valid sizes 112, 168 */ },
-	{ 0, "HMAC-MD5", TEE_TYPE_HMAC_MD5, 8, 64, 512 },
-	{ 0, "HMAC-SHA1", TEE_TYPE_HMAC_SHA1, 8, 80, 512 },
-	{ 0, "HMAC-SHA224", TEE_TYPE_HMAC_SHA224, 8, 112, 512 },
-	{ 0, "HMAC-SHA256", TEE_TYPE_HMAC_SHA256, 8, 192, 1024 },
-	{ 0, "HMAC-SHA384", TEE_TYPE_HMAC_SHA384, 8, 256, 1024 },
-	{ 0, "HMAC-SHA512", TEE_TYPE_HMAC_SHA512, 8, 256, 1024 },
-	{ 0, "Generic secret", TEE_TYPE_GENERIC_SECRET, 8, 128, 4096 },
-	{ 1, "RSA-2048", TEE_TYPE_RSA_KEYPAIR, 1, 2048, 2048 },
-
-	/* New tests added to check non-regression of issue #5398 */
-	{ 0, "RSA-256", TEE_TYPE_RSA_KEYPAIR, 1, 256, 256 },
-	{ 1, "RSA-384", TEE_TYPE_RSA_KEYPAIR, 1, 384, 384 },
-	{ 1, "RSA-512", TEE_TYPE_RSA_KEYPAIR, 1, 512, 512 },
-	{ 1, "RSA-640", TEE_TYPE_RSA_KEYPAIR, 1, 640, 640 },
-	{ 1, "RSA-768", TEE_TYPE_RSA_KEYPAIR, 1, 768, 768 },
-	{ 1, "RSA-896", TEE_TYPE_RSA_KEYPAIR, 1, 896, 896 },
-	{ 1, "RSA-1024", TEE_TYPE_RSA_KEYPAIR, 1, 1024, 1024 },
 };
 
-static void xtest_test_keygen_noparams(ADBG_Case_t *c, TEEC_Session *session)
+static void keygen_noparams(ADBG_Case_t *c, TEEC_Session *session,
+			    const struct key_types_noparam *key_types,
+			    size_t num_key_types)
 {
-	size_t n;
-	uint32_t key_size;
-	static const struct {
-		unsigned level;
-		const char *name;
-		uint32_t key_type;
-		uint32_t quanta;
-		uint32_t min_size;
-		uint32_t max_size;
-	} key_types[] = {
-		{ 0, "AES", TEE_TYPE_AES, 64, 128,
-		  256 /* valid sizes 128, 192, 256 */ },
-		{ 0, "DES", TEE_TYPE_DES, 56, 56, 56 /* valid size 56 */ },
-		{ 0, "DES3", TEE_TYPE_DES3, 56, 112,
-		  168 /* valid sizes 112, 168 */ },
-		{ 0, "HMAC-MD5", TEE_TYPE_HMAC_MD5, 8, 64, 512 },
-		{ 0, "HMAC-SHA1", TEE_TYPE_HMAC_SHA1, 8, 80, 512 },
-		{ 0, "HMAC-SHA224", TEE_TYPE_HMAC_SHA224, 8, 112, 512 },
-		{ 0, "HMAC-SHA256", TEE_TYPE_HMAC_SHA256, 8, 192, 1024 },
-		{ 0, "HMAC-SHA384", TEE_TYPE_HMAC_SHA384, 8, 256, 1024 },
-		{ 0, "HMAC-SHA512", TEE_TYPE_HMAC_SHA512, 8, 256, 1024 },
-		{ 0, "Generic secret", TEE_TYPE_GENERIC_SECRET, 8, 128, 4096 },
-		{ 1, "RSA-2048", TEE_TYPE_RSA_KEYPAIR, 1, 2048, 2048 },
+	size_t n = 0;
+	uint32_t key_size = 0;
 
-		/* New tests added to check non-regression of issue #5398 */
-		{ 0, "RSA-256", TEE_TYPE_RSA_KEYPAIR, 1, 256, 256 },
-		{ 1, "RSA-384", TEE_TYPE_RSA_KEYPAIR, 1, 384, 384 },
-		{ 1, "RSA-512", TEE_TYPE_RSA_KEYPAIR, 1, 512, 512 },
-		{ 1, "RSA-640", TEE_TYPE_RSA_KEYPAIR, 1, 640, 640 },
-		{ 1, "RSA-768", TEE_TYPE_RSA_KEYPAIR, 1, 768, 768 },
-		{ 1, "RSA-896", TEE_TYPE_RSA_KEYPAIR, 1, 896, 896 },
-		{ 1, "RSA-1024", TEE_TYPE_RSA_KEYPAIR, 1, 1024, 1024 },
-	};
-
-	for (n = 0; n < ARRAY_SIZE(key_types); n++) {
+	for (n = 0; n < num_key_types; n++) {
 		uint32_t min_size = key_types[n].min_size;
 		uint32_t max_size = key_types[n].max_size;
 		uint32_t quanta = key_types[n].quanta;
@@ -6190,6 +6138,76 @@ static void xtest_test_keygen_noparams(ADBG_Case_t *c, TEEC_Session *session)
 		Do_ADBG_EndSubCase(c, "Generate %s key", key_types[n].name);
 	}
 }
+
+static const struct key_types_noparam keygen_symmetric_key_types[] = {
+	{ 0, "AES", TEE_TYPE_AES, 64, 128,
+	  256 /* valid sizes 128, 192, 256 */ },
+	{ 0, "DES", TEE_TYPE_DES, 56, 56, 56 /* valid size 56 */ },
+	{ 0, "DES3", TEE_TYPE_DES3, 56, 112,
+	  168 /* valid sizes 112, 168 */ },
+	{ 0, "HMAC-MD5", TEE_TYPE_HMAC_MD5, 8, 64, 512 },
+	{ 0, "HMAC-SHA1", TEE_TYPE_HMAC_SHA1, 8, 80, 512 },
+	{ 0, "HMAC-SHA224", TEE_TYPE_HMAC_SHA224, 8, 112, 512 },
+	{ 0, "HMAC-SHA256", TEE_TYPE_HMAC_SHA256, 8, 192, 1024 },
+	{ 0, "HMAC-SHA384", TEE_TYPE_HMAC_SHA384, 8, 256, 1024 },
+	{ 0, "HMAC-SHA512", TEE_TYPE_HMAC_SHA512, 8, 256, 1024 },
+	{ 0, "Generic secret", TEE_TYPE_GENERIC_SECRET, 8, 128, 4096 },
+};
+
+static void xtest_tee_test_4007_symmetric(ADBG_Case_t *c)
+{
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+					&ret_orig)))
+		return;
+
+	keygen_noparams(c, &session,
+			keygen_symmetric_key_types,
+			ARRAY_SIZE(keygen_symmetric_key_types));
+
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 4007_symmetric, xtest_tee_test_4007_symmetric,
+		"Test TEE Internal API Generate Symmetric key");
+
+static const struct key_types_noparam keygen_rsa_key_types[] = {
+	{ 0, "RSA-256", TEE_TYPE_RSA_KEYPAIR, 1, 256, 256 },
+	{ 1, "RSA-384", TEE_TYPE_RSA_KEYPAIR, 1, 384, 384 },
+	{ 1, "RSA-512", TEE_TYPE_RSA_KEYPAIR, 1, 512, 512 },
+	{ 1, "RSA-640", TEE_TYPE_RSA_KEYPAIR, 1, 640, 640 },
+	{ 1, "RSA-768", TEE_TYPE_RSA_KEYPAIR, 1, 768, 768 },
+	{ 1, "RSA-896", TEE_TYPE_RSA_KEYPAIR, 1, 896, 896 },
+	{ 1, "RSA-1024", TEE_TYPE_RSA_KEYPAIR, 1, 1024, 1024 },
+	{ 1, "RSA-2048", TEE_TYPE_RSA_KEYPAIR, 1, 2048, 2048 },
+	{ 1, "RSA-3072", TEE_TYPE_RSA_KEYPAIR, 1, 3072, 3072 },
+	{ 1, "RSA-4096", TEE_TYPE_RSA_KEYPAIR, 1, 4096, 4096 },
+};
+
+static void xtest_tee_test_4007_rsa(ADBG_Case_t *c)
+{
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+
+	memset(&session, 0, sizeof(session));
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+					&ret_orig)))
+		return;
+
+	keygen_noparams(c, &session,
+			keygen_rsa_key_types,
+			ARRAY_SIZE(keygen_rsa_key_types));
+
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 4007_rsa, xtest_tee_test_4007_rsa,
+		"Test TEE Internal API Generate RSA key");
 
 #ifdef CFG_SECURE_KEY_SERVICES
 
@@ -6218,30 +6236,34 @@ static CK_ATTRIBUTE cktest_keygen_noparams_rsa_priv[] = {
 	{ CKA_DECRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 };
 
-static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot)
+static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
+				   const struct key_types_noparam *key_types,
+				   size_t key_types_count)
 {
 	size_t n;
 	uint32_t key_size;
 	CK_RV rv;
 	CK_SESSION_HANDLE session;
 
-	for (n = 0; n < ARRAY_SIZE(keygen_noparams_key_types); n++) {
-		uint32_t min_size = keygen_noparams_key_types[n].min_size;
-		uint32_t max_size = keygen_noparams_key_types[n].max_size;
-		uint32_t quanta = keygen_noparams_key_types[n].quanta;
-		CK_MECHANISM ck_mecha = { 0 };
-		CK_ATTRIBUTE *ck_attrs;
-		CK_ULONG ck_count;
-		CK_ATTRIBUTE *ck_attrs2;
-		CK_ULONG ck_count2;
-		CK_ULONG ck_key_size;
-		CK_ULONG ck_key_type;
+	for (n = 0; n < key_types_count; n++) {
+		uint32_t min_size = key_types[n].min_size;
+		uint32_t max_size = key_types[n].max_size;
+		uint32_t quanta = key_types[n].quanta;
+		CK_MECHANISM ck_mecha;
+		CK_ATTRIBUTE *ck_attrs = NULL;
+		CK_ULONG ck_count = 0;
+		CK_ATTRIBUTE *ck_attrs2 = NULL;
+		CK_ULONG ck_count2 = 0;
+		CK_ULONG ck_key_size = 0;
+		CK_ULONG ck_key_type = 0;
 		CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
-		if (keygen_noparams_key_types[n].level > level)
+		memset(&ck_mecha, 0, sizeof(ck_mecha));
+
+		if (key_types[n].level > level)
 			continue;
 
-		switch (keygen_noparams_key_types[n].key_type) {
+		switch (key_types[n].key_type) {
 		case TEE_TYPE_AES:
 			ck_key_type = CKK_AES;
 			ck_mecha.mechanism = CKM_AES_KEY_GEN;
@@ -6283,8 +6305,7 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot)
 			continue;
 		}
 
-		Do_ADBG_BeginSubCase(c, "Generate %s key",
-					keygen_noparams_key_types[n].name);
+		Do_ADBG_BeginSubCase(c, "Generate %s key", key_types[n].name);
 
 		rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
 		if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -6303,7 +6324,7 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot)
 		     key_size += quanta) {
 			bool r;
 
-			switch (keygen_noparams_key_types[n].key_type) {
+			switch (key_types[n].key_type) {
 			case TEE_TYPE_AES:
 			case TEE_TYPE_HMAC_MD5:
 			case TEE_TYPE_HMAC_SHA1:
@@ -6313,7 +6334,7 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot)
 			case TEE_TYPE_HMAC_SHA512:
 			case TEE_TYPE_GENERIC_SECRET:
 				/* Most PKCS#11 keys are length in bytes */
-				if (keygen_noparams_key_types[n].key_type ==
+				if (key_types[n].key_type ==
 				    TEE_TYPE_GENERIC_SECRET)
 					ck_key_size = key_size;
 				else
@@ -6354,25 +6375,42 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot)
 
 		C_CloseSession(session);
 
-		Do_ADBG_EndSubCase(c, "Generate %s key",
-					keygen_noparams_key_types[n].name);
+		Do_ADBG_EndSubCase(c, "Generate %s key", key_types[n].name);
 	}
 
 	return;
 
 broken_test:
-	Do_ADBG_Log("Broken test setup for key %s",
-			keygen_noparams_key_types[n].name);
+	Do_ADBG_Log("Broken test setup for key %s", key_types[n].name);
 	ADBG_EXPECT_TRUE(c, false);
 
 	C_CloseSession(session);
 
 	Do_ADBG_EndSubCase(c, NULL);
 }
-#endif
 
-static void xtest_test_keygen_dh(ADBG_Case_t *c, TEEC_Session *session)
+/*
+ * The test below belongs to the regression 41xx test. As it relies on test
+ * vectors defined for the 40xx test, this test sequence is implemented here.
+ * The test below checks compliance of crypto algorithms called through the
+ * PKCS#11 interface.
+ */
+void run_xtest_tee_test_4216(ADBG_Case_t *c, CK_SLOT_ID slot);
+void run_xtest_tee_test_4216(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
+	cktest_keygen_noparams(c, slot, keygen_symmetric_key_types,
+			       ARRAY_SIZE(keygen_symmetric_key_types));
+
+	// TODO: assign to a specific test ID
+	cktest_keygen_noparams(c, slot, keygen_rsa_key_types,
+			       ARRAY_SIZE(keygen_rsa_key_types));
+}
+#endif /*CFG_SECURE_KEY_SERVICES*/
+
+static void xtest_tee_test_4007_dh(ADBG_Case_t *c)
+{
+	TEEC_Session session;
+	uint32_t ret_orig;
 	size_t n;
 	size_t param_count;
 	/*
@@ -6437,6 +6475,10 @@ static void xtest_test_keygen_dh(ADBG_Case_t *c, TEEC_Session *session)
 		{ 1, 2048, XTEST_DH_GK_DATA_SUBPRIME(keygen_dh2048_subprime) }
 	};
 
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+						&ret_orig)))
+		return;
 
 	for (n = 0; n < ARRAY_SIZE(key_types); n++) {
 		if (key_types[n].level > level)
@@ -6473,7 +6515,7 @@ static void xtest_test_keygen_dh(ADBG_Case_t *c, TEEC_Session *session)
 		}
 
 		if (!ADBG_EXPECT_TRUE(c,
-			generate_and_test_key(c, session, TEE_TYPE_DH_KEYPAIR,
+			generate_and_test_key(c, &session, TEE_TYPE_DH_KEYPAIR,
 				*key_types[n].private_bits,
 				key_types[n]. key_size, params, param_count)))
 			break;
@@ -6483,10 +6525,15 @@ static void xtest_test_keygen_dh(ADBG_Case_t *c, TEEC_Session *session)
 				   key_types[n].key_size,
 				   *key_types[n].private_bits);
 	}
-}
 
-static void xtest_test_keygen_dsa(ADBG_Case_t *c, TEEC_Session *session)
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 4007_dh, xtest_tee_test_4007_dh,
+		"Test TEE Internal API Generate DH key");
+
+static void xtest_tee_test_4007_dsa(ADBG_Case_t *c)
 {
+	TEEC_Session session;
 	size_t n;
 	size_t param_count;
 	TEE_Attribute params[4];
@@ -6517,6 +6564,11 @@ static void xtest_test_keygen_dsa(ADBG_Case_t *c, TEEC_Session *session)
 		{ 1, 1024, XTEST_DSA_GK_DATA(keygen_dsa1024) },
 	};
 
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+						&ret_orig)))
+		return;
+
 	for (n = 0; n < ARRAY_SIZE(key_types); n++) {
 		if (key_types[n].level > level)
 			continue;
@@ -6537,7 +6589,7 @@ static void xtest_test_keygen_dsa(ADBG_Case_t *c, TEEC_Session *session)
 			       key_types[n].base, key_types[n].base_len);
 
 		if (!ADBG_EXPECT_TRUE(c,
-			generate_and_test_key(c, session, TEE_TYPE_DSA_KEYPAIR,
+			generate_and_test_key(c, &session, TEE_TYPE_DSA_KEYPAIR,
 				1, key_types[n]. key_size, params,
 				param_count)))
 			break;
@@ -6545,12 +6597,18 @@ static void xtest_test_keygen_dsa(ADBG_Case_t *c, TEEC_Session *session)
 		Do_ADBG_EndSubCase(c, "Generate DSA key %d bits",
 				   key_types[n].key_size);
 	}
-}
 
-static void xtest_test_keygen_ecc(ADBG_Case_t *c, TEEC_Session *session)
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 4007_dsa, xtest_tee_test_4007_dsa,
+		"Test TEE Internal API Generate DSA key");
+
+static void xtest_tee_test_4007_ecc(ADBG_Case_t *c)
 {
-	size_t n;
-	size_t param_count;
+	TEEC_Session session;
+	uint32_t ret_orig = 0;
+	size_t n = 0;
+	size_t param_count = 0;
 	TEE_Attribute params[4];
 
 	static const struct {
@@ -6585,6 +6643,14 @@ static void xtest_test_keygen_ecc(ADBG_Case_t *c, TEEC_Session *session)
 		521 },
 	};
 
+	memset(&session, 0, sizeof(session));
+	memset(params, 0, sizeof(params));
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
+					&ret_orig)))
+		return;
+
 	for (n = 0; n < ARRAY_SIZE(key_types); n++) {
 		if (key_types[n].level > level)
 			continue;
@@ -6596,56 +6662,28 @@ static void xtest_test_keygen_ecc(ADBG_Case_t *c, TEEC_Session *session)
 			             key_types[n].curve, 0);
 
 		if (!ADBG_EXPECT_TRUE(c,
-			generate_and_test_key(c, session, key_types[n].algo,
+			generate_and_test_key(c, &session, key_types[n].algo,
 				0, key_types[n].key_size, params,
 				param_count)))
 			break;
 
 		Do_ADBG_EndSubCase(c, "Generate %s", key_types[n].name);
 	}
-}
-
-static void xtest_tee_test_4007(ADBG_Case_t *c)
-{
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-
-	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
-		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
-					&ret_orig)))
-		return;
-
-	xtest_test_keygen_noparams(c, &session);
-
-	xtest_test_keygen_dh(c, &session);
-
-	xtest_test_keygen_dsa(c, &session);
-
-	xtest_test_keygen_ecc (c, &session);
 
 	TEEC_CloseSession(&session);
 }
-ADBG_CASE_DEFINE(regression, 4007, xtest_tee_test_4007,
-		"Test TEE Internal API Generate key");
+ADBG_CASE_DEFINE(regression, 4007_ecc, xtest_tee_test_4007_ecc,
+		"Test TEE Internal API Generate ECC key");
 
 #ifdef CFG_SECURE_KEY_SERVICES
 /*
+ * TODO: ECC key gen
+ *
  * The test below belongs to the regression 41xx test. As it relies on test
  * vectors defined for the 40xx test, this test sequence is implemented here.
  * The test below checks compliance of crypto algorithms called through the
  * PKCS#11 interface.
  */
-void run_xtest_tee_test_4216(ADBG_Case_t *c, CK_SLOT_ID slot);
-void run_xtest_tee_test_4216(ADBG_Case_t *c, CK_SLOT_ID slot)
-{
-	cktest_keygen_noparams(c, slot);
-
-	//cktest_keygen_dh(c, slot);
-
-	//cktest_keygen_dsa(c, slot);
-
-	//cktest_keygen_ecc(c, slot);
-}
 #endif
 
 static void xtest_tee_test_4008(ADBG_Case_t *c)
