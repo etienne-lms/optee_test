@@ -2166,7 +2166,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif
+#endif /*CFG_SECURE_KEY_SERVICES*/
 
 static const uint8_t ciph_data_aes_key1[] = {
 	0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, /* 01234567 */
@@ -3183,7 +3183,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif
+#endif /*CFG_SECURE_KEY_SERVICES*/
 
 static void xtest_tee_test_4004(ADBG_Case_t *c)
 {
@@ -3784,7 +3784,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif
+#endif /*CFG_SECURE_KEY_SERVICES*/
 
 struct xtest_ac_case {
 	unsigned int level;
@@ -5807,7 +5807,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif
+#endif /*CFG_SECURE_KEY_SERVICES*/
 
 #define KEY_ATTR(x, y) { #x, (x), y }
 
@@ -6100,7 +6100,7 @@ static bool cktest_generate_and_test_key(ADBG_Case_t *c,
 bail:
 	return rv == CKR_OK;
 }
-#endif
+#endif /*CFG_SECURE_KEY_SERVICES*/
 
 struct key_types_noparam {
 	unsigned level;
