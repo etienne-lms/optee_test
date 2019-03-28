@@ -6341,7 +6341,8 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 				else
 					ck_key_size = key_size / 8;
 
-				if (set_ck_attr(ck_attrs, ck_count, CKA_VALUE_LEN,
+				if (set_ck_attr(ck_attrs, ck_count,
+						CKA_VALUE_LEN,
 						(void *)&ck_key_size,
 						sizeof(ck_key_size)))
 					goto broken_test;
@@ -6354,7 +6355,8 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 
 			case TEE_TYPE_RSA_KEYPAIR:
 				ck_key_size = key_size;
-				if (set_ck_attr(ck_attrs, ck_count, CKA_MODULUS_BITS,
+				if (set_ck_attr(ck_attrs, ck_count,
+						CKA_MODULUS_BITS,
 						(void *)&ck_key_size,
 						sizeof(ck_key_size)))
 					goto broken_test;
