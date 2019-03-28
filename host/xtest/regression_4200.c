@@ -100,9 +100,9 @@ static CK_RV close_lib(void)
 
 static CK_RV init_lib_and_find_token_slot(CK_SLOT_ID *slot)
 {
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SLOT_ID_PTR slots = NULL;
-	CK_ULONG count;
+	CK_ULONG count = 0;
 
 	rv = C_Initialize(0);
 	if (rv)
@@ -154,8 +154,8 @@ static CK_RV init_test_token(CK_SLOT_ID slot)
 static CK_RV init_user_test_token(CK_SLOT_ID slot)
 {
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
-	CK_SESSION_HANDLE session;
-	CK_RV rv;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
+	CK_RV rv = CKR_GENERAL_ERROR;
 
 	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
 	if (rv)
@@ -242,8 +242,8 @@ void run_xtest_tee_test_4218(ADBG_Case_t *c, CK_SLOT_ID slot);
 
 static void cktest_in_regression_40xx(ADBG_Case_t *c, int test_id)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
@@ -320,16 +320,16 @@ static void xtest_tee_test_4201(ADBG_Case_t *c)
 
 static void xtest_tee_test_4202(ADBG_Case_t *c)
 {
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SLOT_ID_PTR slot_ids = NULL;
-	CK_ULONG slot_count;
-	CK_ULONG slot_count2;
+	CK_ULONG slot_count = 0;
+	CK_ULONG slot_count2 = 0;
 	CK_INFO lib_info;
 	CK_SLOT_INFO slot_info;
 	CK_TOKEN_INFO token_info;
-	CK_FUNCTION_LIST_PTR ckfunc_list;
-	size_t i;
-	size_t j;
+	CK_FUNCTION_LIST_PTR ckfunc_list = NULL;
+	size_t i = 0;
+	size_t j = 0;
 	CK_MECHANISM_TYPE_PTR mecha_types = NULL;
 
 	rv = C_Initialize(NULL);
@@ -394,8 +394,8 @@ static void xtest_tee_test_4202(ADBG_Case_t *c)
 		for (j = 0; j < mecha_count; j++) {
 			CK_MECHANISM_TYPE type = mecha_types[j];
 			CK_MECHANISM_INFO mecha_info;
-			size_t pos;
-			size_t k;
+			size_t pos = 0;
+			size_t k = 0;
 			/* 1024byte should be enough, if not truncates  */
 			char log[1024] = { 0 };
 
@@ -456,9 +456,9 @@ out:
 
 static void xtest_tee_test_4203(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
-	CK_SESSION_HANDLE session[3];
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
+	CK_SESSION_HANDLE session[3] = { 0 };
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
 
 	rv = init_lib_and_find_token_slot(&slot);
@@ -509,10 +509,10 @@ bail:
 
 static void xtest_tee_test_4204(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_TOKEN_INFO token_info;
-	char label32[32];
+	char label32[32] = { 0 };
 	/* Same content as test_token_so_pin[] but 1 more byte */
 	char pin1[] = { 0, 1, 2, 3, 0, 5, 6, 7, 8, 9, 10 };
 	/* Same content as test_token_so_pin[] but 1 different byte */
@@ -889,7 +889,7 @@ static struct ecc_params ecc_params_der[] = {
 static int set_ck_attr(CK_ATTRIBUTE *attrs, size_t count, CK_ULONG id,
 			CK_VOID_PTR *data, CK_ULONG size)
 {
-	size_t idx;
+	size_t idx = 0;
 
 	for (idx = 0; idx < count; idx++) {
 		if (attrs[idx].type != id)
@@ -909,7 +909,7 @@ static int set_ck_attr(CK_ATTRIBUTE *attrs, size_t count, CK_ULONG id,
 
 static int clear_ck_attr(CK_ATTRIBUTE *attrs, size_t count, CK_ULONG id)
 {
-	size_t idx;
+	size_t idx = 0;
 
 	for (idx = 0; idx < count; idx++) {
 		if (attrs[idx].type != id)
@@ -933,16 +933,18 @@ static int clear_ck_attr(CK_ATTRIBUTE *attrs, size_t count, CK_ULONG id)
 /* Generate a generic secret */
 static void xtest_tee_test_4205(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_OBJECT_HANDLE obj_hdl;
-	CK_OBJECT_HANDLE obj_hdl2;
+	CK_OBJECT_HANDLE obj_hdl = CK_INVALID_HANDLE;
+	CK_OBJECT_HANDLE obj_hdl2 = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
-	size_t idx;
+	size_t idx = 0;
 	int subcase = 0;
-	CK_MECHANISM test_mecha = { 0 };
-	CK_ULONG ck_ul;
+	CK_MECHANISM test_mecha;
+	CK_ULONG ck_ul = 0;
+
+	memset(&test_mecha, 0, sizeof(test_mecha));
 
 	rv = init_lib_and_find_token_slot(&slot);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -1234,10 +1236,10 @@ static CK_ATTRIBUTE cktest_session_object[] = {
 /* Create session object and token object from a session */
 static void test_create_destroy_single_object(ADBG_Case_t *c, int persistent)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_OBJECT_HANDLE obj_hdl;
+	CK_OBJECT_HANDLE obj_hdl = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
 
 	rv = init_lib_and_find_token_slot(&slot);
@@ -1274,12 +1276,15 @@ bail:
 
 static void test_create_destroy_session_objects(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_OBJECT_HANDLE obj_hdl[512];
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
-	size_t n;
+	size_t n = 0;
+
+	for (n = 0; n < ARRAY_SIZE(obj_hdl); n++)
+		obj_hdl[n] = CK_INVALID_HANDLE;
 
 	rv = init_lib_and_find_token_slot(&slot);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -1345,11 +1350,11 @@ static void xtest_tee_test_4206(ADBG_Case_t *c)
 /* Create session object and token object from a session */
 static void test_create_objects_in_session(ADBG_Case_t *c, int readwrite)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
-	CK_SESSION_HANDLE session;
-	CK_OBJECT_HANDLE token_obj_hld;
-	CK_OBJECT_HANDLE session_obj_hld;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
+	CK_OBJECT_HANDLE token_obj_hld = CK_INVALID_HANDLE;
+	CK_OBJECT_HANDLE session_obj_hld = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
 	rv = init_lib_and_find_token_slot(&slot);
@@ -1536,8 +1541,8 @@ static CK_RV cipher_init_final(ADBG_Case_t *c, CK_SESSION_HANDLE session,
 				CK_MECHANISM_PTR mechanism, uint32_t mode,
 				CK_RV expected_rc)
 {
-	CK_RV rv;
-	CK_OBJECT_HANDLE object;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_OBJECT_HANDLE object = CK_INVALID_HANDLE;
 
 	switch (mode) {
 	case TEE_MODE_ENCRYPT:
@@ -1590,11 +1595,11 @@ CK_KEY_ALLOWED_AES_DEC_TEST(cktest_aes_dec_only_ccm, allowed_only_aes_ccm);
 
 static void xtest_tee_test_4208(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
-	size_t n;
+	size_t n = 0;
 
 	rv = init_lib_and_find_token_slot(&slot);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -1651,8 +1656,8 @@ bail:
 
 static void xtest_tee_test_4209(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
@@ -1768,8 +1773,8 @@ static CK_RV open_cipher_session(ADBG_Case_t *c,
 				 CK_ATTRIBUTE_PTR attr_key, CK_ULONG attr_count,
 				 CK_MECHANISM_PTR mechanism, uint32_t mode)
 {
-	CK_RV rv;
-	CK_OBJECT_HANDLE object;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_OBJECT_HANDLE object = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
 	switch (mode) {
@@ -1811,10 +1816,10 @@ bail:
 
 static void xtest_tee_test_4213(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE sessions[128];
-	size_t n;
+	size_t n = 0;
 
 	for (n = 0; n < ARRAY_SIZE(sessions); n++)
 		sessions[n] = CK_INVALID_HANDLE;
@@ -1994,7 +1999,7 @@ static CK_ATTRIBUTE cktest_findobj_pers_aes[] = {
 
 static void destroy_persistent_objects(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
-	uint32_t rv;
+	uint32_t rv = CKR_GENERAL_ERROR;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
 	CK_OBJECT_HANDLE obj_hdl = CK_INVALID_HANDLE;
@@ -2045,14 +2050,14 @@ bail:
 
 static void xtest_tee_test_4214(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_OBJECT_HANDLE obj_hdl[10];
 	CK_OBJECT_HANDLE obj_found[10];
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
-	CK_ULONG hdl_count;
-	size_t n;
+	CK_ULONG hdl_count = 0;
+	size_t n = 0;
 
 	for (n = 0; n < ARRAY_SIZE(obj_hdl); n++)
 		obj_hdl[n] = CK_INVALID_HANDLE;
@@ -2309,14 +2314,14 @@ bail0:
 
 static void xtest_tee_test_4215(ADBG_Case_t *c)
 {
-	CK_RV rv;
-	CK_SLOT_ID slot;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_OBJECT_HANDLE obj_hdl[10];
 	CK_OBJECT_HANDLE obj_found[10];
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
-	CK_ULONG hdl_count;
-	size_t n;
+	CK_ULONG hdl_count = 0;
+	size_t n = 0;
 
 	for (n = 0; n < ARRAY_SIZE(obj_hdl); n++)
 		obj_hdl[n] = CK_INVALID_HANDLE;

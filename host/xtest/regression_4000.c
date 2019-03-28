@@ -3594,15 +3594,15 @@ static const struct cktest_ae_test_case cktest_ae_test_case[] = {
 
 void run_xtest_tee_test_4212(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_OBJECT_HANDLE key_handle;
-	uint8_t out[512];
-	CK_ULONG out_size;
-	size_t out_offs;
-	size_t n;
+	CK_OBJECT_HANDLE key_handle = CK_INVALID_HANDLE;
+	uint8_t out[512] = { 0 };
+	CK_ULONG out_size = 0;
+	size_t out_offs = 0;
+	size_t n = 0;
 	int close_subcase = 0;
-	struct xtest_ae_case const *test;
+	struct xtest_ae_case const *test = NULL;
 
 	rv = C_OpenSession(slot, CKF_SERIAL_SESSION | CKF_RW_SESSION,
 			   NULL, 0, &session);
@@ -3610,13 +3610,10 @@ void run_xtest_tee_test_4212(ADBG_Case_t *c, CK_SLOT_ID slot)
 		goto out;
 
 	for (n = 0; n < ARRAY_SIZE(ae_cases); n++) {
-		CK_ATTRIBUTE_PTR ck_key;
-		CK_MECHANISM_PTR mechanism;
+		CK_ATTRIBUTE_PTR ck_key = NULL;
+		CK_MECHANISM_PTR mechanism = NULL;
 		CK_ULONG attr_count = 0;
-		size_t i;
-
-		mechanism = NULL;
-		ck_key = NULL;
+		size_t i = 0;
 
 		for (i = 0; i < ARRAY_SIZE(cktest_ae_test_case); i++) {
 			if (ae_cases[n].key == cktest_ae_test_case[i].key) {
@@ -5397,7 +5394,7 @@ static struct mechanism_converter mechanism_converter[] = {
 static int tee_alg2ckmt(uint32_t tee_alg, CK_MECHANISM_PTR mecha)
 {
 	struct mechanism_converter *conv = mechanism_converter;
-	size_t n;
+	size_t n = 0;
 
 	for (n = 0; n < ARRAY_SIZE(mechanism_converter); n++, conv++) {
 		if (conv->tee_algo != tee_alg)
@@ -5418,21 +5415,23 @@ static int tee_alg2ckmt(uint32_t tee_alg, CK_MECHANISM_PTR mecha)
 
 void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_OBJECT_HANDLE priv_key_handle = CK_INVALID_HANDLE;
 	CK_OBJECT_HANDLE pub_key_handle = CK_INVALID_HANDLE;
-	uint8_t out[512];
-	size_t out_size;
-	uint8_t out_enc[512];
-	size_t out_enc_size;
-	size_t n;
+	uint8_t out[512] = { 0 };
+	size_t out_size = 0;
+	uint8_t out_enc[512] = { 0 };
+	size_t out_enc_size = 0;
+	size_t n = 0;
 	int subcase = 0;
 	/* Compute hash through cryp test TA (until SKS supports hashes */
-	uint8_t ptx_hash[TEE_MAX_HASH_SIZE];
-	size_t ptx_hash_size;
-	TEEC_Session crypta_session = { 0 };
-	uint32_t ret_orig;
+	uint8_t ptx_hash[TEE_MAX_HASH_SIZE] = { 0 };
+	size_t ptx_hash_size = 0;
+	TEEC_Session crypta_session;
+	uint32_t ret_orig = 0;
+
+	memset(&crypta_session, 0, sizeof(crypta_session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 				xtest_teec_open_session(&crypta_session,
@@ -5446,10 +5445,12 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 		goto out;
 
 	for (n = 0; n < ARRAY_SIZE(xtest_ac_cases); n++) {
-		CK_MECHANISM mechanism = { 0 };
+		CK_MECHANISM mechanism;
 		const struct xtest_ac_case *tv = xtest_ac_cases + n;
-		CK_ATTRIBUTE *rsa_priv_attr;
-		size_t rsa_priv_count;
+		CK_ATTRIBUTE *rsa_priv_attr = NULL;
+		size_t rsa_priv_count = 0;
+
+		memset(&mechanism, 0, sizeof(mechanism));
 
 		if (tv->level > level)
 			continue;
@@ -5489,7 +5490,7 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 		 * the payload.
 		 */
 		if (tv->mode == TEE_MODE_VERIFY || tv->mode == TEE_MODE_SIGN) {
-			uint32_t hash_algo;
+			uint32_t hash_algo = 0;
 			TEE_OperationHandle op = TEE_HANDLE_NULL;
 
 			if (TEE_ALG_GET_MAIN_ALG(tv->algo) ==
@@ -6028,10 +6029,10 @@ static bool cktest_generate_and_test_key(ADBG_Case_t *c,
 	CK_ATTRIBUTE cktest_findobj_local[] = {
 		{ CKA_LOCAL, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	};
-	CK_RV rv;
-	CK_OBJECT_HANDLE obj_hdl;
-	CK_OBJECT_HANDLE obj_hdl2;
-	CK_OBJECT_HANDLE obj_hdl3;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_OBJECT_HANDLE obj_hdl = CK_INVALID_HANDLE;
+	CK_OBJECT_HANDLE obj_hdl2 = CK_INVALID_HANDLE;
+	CK_OBJECT_HANDLE obj_hdl3 = CK_INVALID_HANDLE;
 	CK_ULONG count = 1;
 
 	if (ck_count2) {
@@ -6240,10 +6241,10 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 				   const struct key_types_noparam *key_types,
 				   size_t key_types_count)
 {
-	size_t n;
-	uint32_t key_size;
-	CK_RV rv;
-	CK_SESSION_HANDLE session;
+	size_t n = 0;
+	uint32_t key_size = 0;
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 
 	for (n = 0; n < key_types_count; n++) {
 		uint32_t min_size = key_types[n].min_size;
@@ -6322,7 +6323,7 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 
 		for (key_size = min_size; key_size <= max_size;
 		     key_size += quanta) {
-			bool r;
+			bool r = false;
 
 			switch (key_types[n].key_type) {
 			case TEE_TYPE_AES:
@@ -6534,8 +6535,9 @@ ADBG_CASE_DEFINE(regression, 4007_dh, xtest_tee_test_4007_dh,
 static void xtest_tee_test_4007_dsa(ADBG_Case_t *c)
 {
 	TEEC_Session session;
-	size_t n;
-	size_t param_count;
+	uint32_t ret_orig = 0;
+	size_t n = 0;
+	size_t param_count = 0;
 	TEE_Attribute params[4];
 
 #define XTEST_DSA_GK_DATA(vect) \
@@ -6563,6 +6565,9 @@ static void xtest_tee_test_4007_dsa(ADBG_Case_t *c)
 		{ 1, 960, XTEST_DSA_GK_DATA(keygen_dsa960) },
 		{ 1, 1024, XTEST_DSA_GK_DATA(keygen_dsa1024) },
 	};
+
+	memset(&session, 0, sizeof(session));
+	memset(params, 0, sizeof(params));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -6927,13 +6932,13 @@ void run_xtest_tee_test_4218(ADBG_Case_t *c, CK_SLOT_ID slot);
 
 void run_xtest_tee_test_4218(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
-	uint32_t size_bytes;
-	uint32_t i;
-	struct derive_key_ecdh_t *pt;
-	CK_OBJECT_HANDLE derived_key_handle;
-	CK_OBJECT_HANDLE priv_key_handle;
+	uint32_t size_bytes = 0;
+	uint32_t i = 0;
+	struct derive_key_ecdh_t *pt = NULL;
+	CK_OBJECT_HANDLE derived_key_handle = CK_INVALID_HANDLE;
+	CK_OBJECT_HANDLE priv_key_handle = CK_INVALID_HANDLE;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 
 	rv = C_OpenSession(slot, CKF_SERIAL_SESSION | CKF_RW_SESSION,
 			   NULL, 0, &session);
@@ -6950,14 +6955,16 @@ void run_xtest_tee_test_4218(ADBG_Case_t *c, CK_SLOT_ID slot)
 						sizeof(CK_OBJECT_CLASS) },
 			{ CKA_VALUE_LEN, &(CK_ULONG){0}, sizeof(CK_ULONG) },
 		};
-		uint8_t derived_key_value[16];
+		uint8_t derived_key_value[16] = { 0 };
 		CK_ATTRIBUTE get_derived_key_template[] = {
 			{ CKA_VALUE, &(CK_VOID_PTR){&derived_key_value},
 						sizeof(derived_key_value) },
 		};
-		CK_MECHANISM ck_mechanism = { 0 };
-		CK_ECDH1_DERIVE_PARAMS *edch_params;
-		CK_ULONG ck_key_bit_size;
+		CK_MECHANISM ck_mechanism;
+		CK_ECDH1_DERIVE_PARAMS *edch_params = NULL;
+		CK_ULONG ck_key_bit_size = 0;
+
+		memset(&ck_mechanism, 0, sizeof(ck_mechanism));
 
 		pt = &derive_key_ecdh[i];
 
