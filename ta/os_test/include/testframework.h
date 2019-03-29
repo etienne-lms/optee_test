@@ -35,9 +35,6 @@
 #include "tb_macros.h"
 #include "tb_asserts.h"
 
-//#include <mpa.h>
-#include <string.h>
-
 /* define the max size of generated numbers */
 /* this is number of hex chars in the number */
 #define MAX_RAND_DIGITS         256
