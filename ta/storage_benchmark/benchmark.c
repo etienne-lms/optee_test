@@ -126,13 +126,10 @@ static TEE_Result test_write(TEE_ObjectHandle object, size_t data_size,
 		uint8_t *chunk_buf, size_t chunk_size,
 		uint32_t *spent_time_in_ms)
 {
-	TEE_Time start_time;
-	TEE_Time stop_time;
+	TEE_Time start_time = { };
+	TEE_Time stop_time = { };
 	size_t remain_bytes = data_size;
 	TEE_Result res = TEE_SUCCESS;
-
-	TEE_MemFill(&start_time, 0, sizeof(start_time));
-	TEE_MemFill(&stop_time, 0, sizeof(stop_time));
 
 	TEE_GetSystemTime(&start_time);
 
@@ -169,14 +166,11 @@ static TEE_Result test_read(TEE_ObjectHandle object, size_t data_size,
 		uint8_t *chunk_buf, size_t chunk_size,
 		uint32_t *spent_time_in_ms)
 {
-	TEE_Time start_time;
-	TEE_Time stop_time;
+	TEE_Time start_time = { };
+	TEE_Time stop_time = { };
 	size_t remain_bytes = data_size;
 	TEE_Result res = TEE_SUCCESS;
 	uint32_t read_bytes = 0;
-
-	TEE_MemFill(&start_time, 0, sizeof(start_time));
-	TEE_MemFill(&stop_time, 0, sizeof(stop_time));
 
 	TEE_GetSystemTime(&start_time);
 
@@ -215,14 +209,11 @@ static TEE_Result test_rewrite(TEE_ObjectHandle object, size_t data_size,
 		uint8_t *chunk_buf, size_t chunk_size,
 		uint32_t *spent_time_in_ms)
 {
-	TEE_Time start_time;
-	TEE_Time stop_time;
+	TEE_Time start_time = { };
+	TEE_Time stop_time = { };
 	size_t remain_bytes = data_size;
 	TEE_Result res = TEE_SUCCESS;
 	uint32_t read_bytes = 0;
-
-	TEE_MemFill(&start_time, 0, sizeof(start_time));
-	TEE_MemFill(&stop_time, 0, sizeof(stop_time));
 
 	TEE_GetSystemTime(&start_time);
 

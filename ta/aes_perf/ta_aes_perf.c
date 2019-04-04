@@ -193,7 +193,7 @@ TEE_Result cmd_prepare_key(uint32_t param_types, TEE_Param params[4])
 	TEE_Result res = TEE_ERROR_GENERIC;
 	TEE_ObjectHandle hkey = TEE_HANDLE_NULL;
 	TEE_ObjectHandle hkey2 = TEE_HANDLE_NULL;
-	TEE_Attribute attr;
+	TEE_Attribute attr = { };
 	uint32_t mode = 0;
 	uint32_t op_keysize = 0;
 	uint32_t keysize = 0;
@@ -219,8 +219,6 @@ TEE_Result cmd_prepare_key(uint32_t param_types, TEE_Param params[4])
 						   TEE_PARAM_TYPE_VALUE_INPUT,
 						   TEE_PARAM_TYPE_NONE,
 						   TEE_PARAM_TYPE_NONE);
-
-	TEE_MemFill(&attr, 0, sizeof(attr));
 
 	if (param_types != exp_param_types)
 		return TEE_ERROR_BAD_PARAMETERS;

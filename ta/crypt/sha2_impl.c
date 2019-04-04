@@ -334,9 +334,7 @@ void sha256_transf(struct sha256_ctx *ctx, const unsigned char *message,
 void sha256(const unsigned char *message,
 	    unsigned int len, unsigned char *digest)
 {
-	struct sha256_ctx ctx;
-
-	TEE_MemFill(&ctx, 0, sizeof(ctx));
+	struct sha256_ctx ctx = { };
 
 	sha256_init(&ctx);
 	sha256_update(&ctx, message, len);
@@ -447,9 +445,7 @@ void sha256_final(struct sha256_ctx *ctx, unsigned char *digest)
 void sha224(const unsigned char *message, unsigned int len,
 	    unsigned char *digest)
 {
-	struct sha224_ctx ctx;
-
-	TEE_MemFill(&ctx, 0, sizeof(ctx));
+	struct sha224_ctx ctx = { };
 
 	sha224_init(&ctx);
 	sha224_update(&ctx, message, len);

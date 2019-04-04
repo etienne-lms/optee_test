@@ -220,9 +220,7 @@ while (true) {
 
 		case P_TYPE_UUID:
 			{
-				TEE_UUID v;
-
-				TEE_MemFill(&v, 0, sizeof(v));
+				TEE_UUID v = { };
 
 				res =
 				    TEE_GetPropertyAsUUID(h, NULL, &v);
@@ -237,9 +235,7 @@ while (true) {
 
 		case P_TYPE_IDENTITY:
 			{
-				TEE_Identity v;
-
-				TEE_MemFill(&v, 0, sizeof(v));
+				TEE_Identity v = { };
 
 				res =
 				    TEE_GetPropertyAsIdentity(h, NULL,
@@ -277,11 +273,9 @@ while (true) {
 					const char exp_bin_value[] =
 					    "Hello world!";
 
-					if (bblen != strlen(exp_bin_value)
-					    ||
-					    TEE_MemCompare
-					    (exp_bin_value, bbuf,
-					     bblen) != 0) {
+					if (bblen != strlen(exp_bin_value) ||
+					    TEE_MemCompare(exp_bin_value, bbuf,
+							   bblen) != 0) {
 						EMSG(
 						"Binary buffer of \"%s\" differs from \"%s\"\n",
 							nbuf, exp_bin_value);
@@ -329,7 +323,7 @@ static TEE_Result test_malloc(void)
 static TEE_Result test_properties(void)
 {
 	TEE_Result res = TEE_ERROR_GENERIC;
-	TEE_PropSetHandle h;
+	TEE_PropSetHandle h = { 0 };
 	struct p_attr p_attrs[] = {
 		{"gpd.ta.appID", P_TYPE_UUID},
 		{"gpd.ta.singleInstance", P_TYPE_BOOL},
@@ -363,8 +357,6 @@ static TEE_Result test_properties(void)
 	};
 	const size_t num_p_attrs = sizeof(p_attrs) / sizeof(p_attrs[0]);
 	size_t n = 0;
-
-	TEE_MemFill(&h, 0, sizeof(h));
 
 	res = TEE_AllocatePropertyEnumerator(&h);
 	if (res != TEE_SUCCESS) {
@@ -410,12 +402,10 @@ static TEE_Result test_mem_access_right(uint32_t param_types,
 	TEE_Result res = TEE_ERROR_GENERIC;
 	uint32_t ret_orig = 0;
 	uint32_t l_pts = 0;
-	TEE_Param l_params[4];
+	TEE_Param l_params[4] = { };
 	uint8_t buf[32] = { 0 };
 	TEE_TASessionHandle sess = TEE_HANDLE_NULL;
 	TEE_UUID *uuid = NULL;
-
-	TEE_MemFill(l_params, 0, sizeof(l_params));
 
 	if (param_types !=
 	    TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT, 0, 0, 0))
@@ -501,13 +491,10 @@ cleanup_return:
 static TEE_Result test_time(void)
 {
 	TEE_Result res = TEE_ERROR_GENERIC;
-	TEE_Time t;
-	TEE_Time sys_t;
+	TEE_Time t = { };
+	TEE_Time sys_t = { };
 	static const TEE_Time null_time = { 0, 0 };
 	static const TEE_Time wrap_time = { UINT32_MAX, 999 };
-
-	TEE_MemFill(&t, 0, sizeof(t));
-	TEE_MemFill(&sys_t, 0, sizeof(sys_t));
 
 	TEE_GetSystemTime(&sys_t);
 	printf("system time %u.%03u\n", (unsigned int)sys_t.seconds,
@@ -682,9 +669,7 @@ static __noinline void call_longjmp(jmp_buf env)
 
 static TEE_Result test_setjmp(void)
 {
-	jmp_buf env;
-
-	TEE_MemFill(&env, 0, sizeof(env));
+	jmp_buf env = { };
 
 	if (setjmp(env)) {
 		IMSG("Returned via longjmp");
@@ -795,7 +780,7 @@ TEE_Result ta_entry_client(uint32_t param_types, TEE_Param params[4])
 	static const TEE_UUID crypt_uuid = TA_CRYPT_UUID;
 	TEE_Result res = TEE_ERROR_GENERIC;
 	uint32_t l_pts = 0;
-	TEE_Param l_params[4];
+	TEE_Param l_params[4] = { };
 	TEE_TASessionHandle sess = TEE_HANDLE_NULL;
 	uint32_t ret_orig = 0;
 	static const uint8_t sha256_in[] = { 'a', 'b', 'c' };
@@ -807,8 +792,6 @@ TEE_Result ta_entry_client(uint32_t param_types, TEE_Param params[4])
 	};
 	uint8_t out[32] = { 0 };
 	void *in = NULL;
-
-	TEE_MemFill(l_params, 0, sizeof(l_params));
 
 	(void)param_types;
 	(void)params;
@@ -944,24 +927,20 @@ static void incr_values(size_t bufsize, uint8_t *a, uint8_t *b, uint8_t *c)
 	}
 }
 
+#define TA2TA_BUF_SIZE		(2 * 1024)
 TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 {
 	static const TEE_UUID test_uuid = TA_OS_TEST_UUID;
 	TEE_TASessionHandle sess = TEE_HANDLE_NULL;
-	TEE_Param l_params[4];
-	const size_t bufsize = 2 * 1024;
-	uint8_t in[bufsize];
-	uint8_t inout[bufsize];
-	uint8_t out[bufsize];
+	TEE_Param l_params[4] = { };
+	const size_t bufsize = TA2TA_BUF_SIZE;
+	uint8_t in[TA2TA_BUF_SIZE] = { };
+	uint8_t inout[TA2TA_BUF_SIZE] = { };
+	uint8_t out[TA2TA_BUF_SIZE] = { };
 	TEE_Result res = TEE_ERROR_GENERIC;
 	uint32_t ret_orig = 0;
 	uint32_t l_pts = 0;
 	size_t i = 0;
-
-	TEE_MemFill(l_params, 0, sizeof(l_params));
-	TEE_MemFill(in, 0, sizeof(in));
-	TEE_MemFill(inout, 0, sizeof(inout));
-	TEE_MemFill(out, 0, sizeof(out));
 
 	(void)params;
 
@@ -978,14 +957,14 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 				TEE_PARAM_TYPE_MEMREF_INOUT,
 				TEE_PARAM_TYPE_MEMREF_OUTPUT, 0);
 	l_params[0].memref.buffer = in;
-	l_params[0].memref.size = bufsize;
+	l_params[0].memref.size = TA2TA_BUF_SIZE;
 	l_params[1].memref.buffer = inout;
-	l_params[1].memref.size = bufsize;
+	l_params[1].memref.size = TA2TA_BUF_SIZE;
 	l_params[2].memref.buffer = out;
-	l_params[2].memref.size = bufsize;
+	l_params[2].memref.size = TA2TA_BUF_SIZE;
 
 	/* Initialize buffers */
-	for (i = 0; i < bufsize; i++) {
+	for (i = 0; i < TA2TA_BUF_SIZE; i++) {
 		in[i] = 5;
 		inout[i] = 10;
 		out[i] = 0;
@@ -1001,12 +980,12 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 		EMSG("TEE_InvokeTACommand failed");
 		goto cleanup_return;
 	}
-	
+
 	/*
 	 * Increment all values by one.
 	 * Expected values after this step: in: 6, inout: 12, out: 17
 	 */
-	incr_values(bufsize, in, inout, out);
+	incr_values(TA2TA_BUF_SIZE, in, inout, out);
 
 	/*
 	 * TA will compute: out = ++inout + in
@@ -1020,12 +999,12 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 	}
 
 	/* Check the actual values */
-	for (i = 0; i < bufsize; i++) {
+	for (i = 0; i < TA2TA_BUF_SIZE; i++) {
 		if (in[i] != 6 || inout[i] != 13 || out[i] != 19) {
 			EMSG("Unexpected value in buffer(s)");
-			DHEXDUMP(in, bufsize);
-			DHEXDUMP(inout, bufsize);
-			DHEXDUMP(out, bufsize);
+			DHEXDUMP(in, TA2TA_BUF_SIZE);
+			DHEXDUMP(inout, TA2TA_BUF_SIZE);
+			DHEXDUMP(out, TA2TA_BUF_SIZE);
 			return TEE_ERROR_GENERIC;
 		}
 	}

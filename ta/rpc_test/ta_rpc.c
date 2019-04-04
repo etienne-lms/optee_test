@@ -40,13 +40,11 @@ static TEE_Result rpc_call_cryp(bool sec_mem, uint32_t nParamTypes,
 	TEE_TASessionHandle cryp_session = TEE_HANDLE_NULL;
 	TEE_Result res = TEE_ERROR_GENERIC;
 	uint32_t origin = 0;
-	TEE_Param params[4];
+	TEE_Param params[4] = { };
 	size_t n = 0;
 	uint32_t types =
 	    TEE_PARAM_TYPES(TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE,
 			    TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE);
-
-	TEE_MemFill(params, 0, sizeof(params));
 
 	res = TEE_OpenTASession(&cryp_uuid, 0, types, params, &cryp_session,
 				&origin);
@@ -162,9 +160,7 @@ TEE_Result rpc_open(void *session_context, uint32_t param_types,
 	uint32_t types =
 	    TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_OUTPUT, TEE_PARAM_TYPE_NONE,
 			    TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE);
-	TEE_Param par[4];
-
-	TEE_MemFill(par, 0, sizeof(par));
+	TEE_Param par[4] = { };
 
 	(void)session_context;
 	(void)param_types;

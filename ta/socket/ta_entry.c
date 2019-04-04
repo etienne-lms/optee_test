@@ -66,16 +66,13 @@ struct sock_handle {
 static TEE_Result ta_entry_tcp_open(uint32_t param_types, TEE_Param params[4])
 {
 	TEE_Result res = TEE_ERROR_GENERIC;
-	struct sock_handle h;
-	TEE_tcpSocket_Setup setup;
+	struct sock_handle h = { };
+	TEE_tcpSocket_Setup setup = { };
 	uint32_t req_param_types =
 		TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
 				TEE_PARAM_TYPE_MEMREF_INPUT,
 				TEE_PARAM_TYPE_MEMREF_OUTPUT,
 				TEE_PARAM_TYPE_VALUE_OUTPUT);
-
-	TEE_MemFill(&h, 0, sizeof(h));
-	TEE_MemFill(&setup, 0, sizeof(setup));
 
 	if (param_types != req_param_types) {
 		EMSG("got param_types 0x%x, expected 0x%x",
@@ -108,16 +105,13 @@ static TEE_Result ta_entry_tcp_open(uint32_t param_types, TEE_Param params[4])
 static TEE_Result ta_entry_udp_open(uint32_t param_types, TEE_Param params[4])
 {
 	TEE_Result res = TEE_ERROR_GENERIC;
-	struct sock_handle h;
-	TEE_udpSocket_Setup setup;
+	struct sock_handle h = { };
+	TEE_udpSocket_Setup setup = { };
 	uint32_t req_param_types =
 		TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
 				TEE_PARAM_TYPE_MEMREF_INPUT,
 				TEE_PARAM_TYPE_MEMREF_OUTPUT,
 				TEE_PARAM_TYPE_VALUE_OUTPUT);
-
-	TEE_MemFill(&h, 0, sizeof(h));
-	TEE_MemFill(&setup, 0, sizeof(setup));
 
 	if (param_types != req_param_types) {
 		EMSG("got param_types 0x%x, expected 0x%x",
