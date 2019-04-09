@@ -60,7 +60,7 @@ int handle_get(struct handle_db *db, void *ptr)
 
 void *handle_put(struct handle_db *db, int handle)
 {
-	void *p = 0;
+	void *p = NULL;
 
 	if (!db || handle < 0 || (size_t)handle >= db->max_ptrs)
 		return NULL;

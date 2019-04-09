@@ -933,7 +933,6 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 	static const TEE_UUID test_uuid = TA_OS_TEST_UUID;
 	TEE_TASessionHandle sess = TEE_HANDLE_NULL;
 	TEE_Param l_params[4] = { };
-	const size_t bufsize = TA2TA_BUF_SIZE;
 	uint8_t in[TA2TA_BUF_SIZE] = { };
 	uint8_t inout[TA2TA_BUF_SIZE] = { };
 	uint8_t out[TA2TA_BUF_SIZE] = { };
