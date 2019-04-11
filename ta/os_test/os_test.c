@@ -81,10 +81,10 @@ size_t n = 0;
 TEE_StartPropertyEnumerator(h, prop_set);
 
 while (true) {
-	char nbuf[256] = { 0 };
-	char nbuf_small[256] = { 0 };
-	char vbuf[256] = { 0 };
-	char vbuf2[256] = { 0 };
+	char nbuf[256] = { };
+	char nbuf_small[256] = { };
+	char vbuf[256] = { };
+	char vbuf2[256] = { };
 	uint32_t nblen = sizeof(nbuf);
 	uint32_t nblen_small = 0;
 	uint32_t vblen = sizeof(vbuf);
@@ -255,7 +255,7 @@ while (true) {
 
 		case P_TYPE_BINARY_BLOCK:
 			{
-				char bbuf[80] = { 0 };
+				char bbuf[80] = { };
 				uint32_t bblen = sizeof(bbuf);
 
 				res =
@@ -323,7 +323,7 @@ static TEE_Result test_malloc(void)
 static TEE_Result test_properties(void)
 {
 	TEE_Result res = TEE_ERROR_GENERIC;
-	TEE_PropSetHandle h = { 0 };
+	TEE_PropSetHandle h = 0;
 	struct p_attr p_attrs[] = {
 		{"gpd.ta.appID", P_TYPE_UUID},
 		{"gpd.ta.singleInstance", P_TYPE_BOOL},
@@ -403,7 +403,7 @@ static TEE_Result test_mem_access_right(uint32_t param_types,
 	uint32_t ret_orig = 0;
 	uint32_t l_pts = 0;
 	TEE_Param l_params[4] = { };
-	uint8_t buf[32] = { 0 };
+	uint8_t buf[32] = { };
 	TEE_TASessionHandle sess = TEE_HANDLE_NULL;
 	TEE_UUID *uuid = NULL;
 

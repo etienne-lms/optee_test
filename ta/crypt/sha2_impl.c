@@ -139,8 +139,8 @@ uint32_t sha256_k[64] = {
 void sha256_transf(struct sha256_ctx *ctx, const unsigned char *message,
 		   unsigned int block_nb)
 {
-	uint32_t w[64] = { 0 };
-	uint32_t wv[8] = { 0 };
+	uint32_t w[64] = { };
+	uint32_t wv[8] = { };
 	uint32_t t1 = 0;
 	uint32_t t2 = 0;
 	const unsigned char *sub_block = NULL;
