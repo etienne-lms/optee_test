@@ -53,6 +53,7 @@ srcs +=	adbg/src/adbg_case.c \
 	regression_8000.c \
 	regression_8100.c \
 	sha_perf.c \
+	stats.c \
 	xtest_helpers.c \
 	xtest_main.c \
 	xtest_test.c
@@ -96,6 +97,8 @@ LOCAL_C_INCLUDES += $(LOCAL_PATH)/host/xtest \
 		$(LOCAL_PATH)/ta/os_test/include \
 		$(LOCAL_PATH)/ta/rpc_test/include \
 		$(LOCAL_PATH)/ta/sims/include \
+		$(LOCAL_PATH)/ta/miss/include \
+		$(LOCAL_PATH)/ta/sims_keepalive/include \
 		$(LOCAL_PATH)/ta/include \
 		$(LOCAL_PATH)/ta/storage_benchmark/include \
 		$(LOCAL_PATH)/ta/sha_perf/include \

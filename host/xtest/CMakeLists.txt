@@ -55,9 +55,14 @@ set (SRC
 	regression_8000.c
 	regression_8100.c
 	sha_perf.c
+	stats.c
 	xtest_helpers.c
 	xtest_main.c
 	xtest_test.c
+)
+
+set_source_files_properties(
+	regression_4100.c PROPERTIES COMPILE_FLAGS -Wno-unsafe-loop-optimizations
 )
 
 if (CFG_GP_SOCKETS)

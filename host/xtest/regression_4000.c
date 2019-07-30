@@ -48,7 +48,7 @@ int ck_ec_params_attr_from_tee_algo(CK_ATTRIBUTE *attrs, size_t count,
 static int set_ck_attr(CK_ATTRIBUTE *attrs, size_t count, CK_ULONG id,
 			CK_VOID_PTR data, CK_ULONG size)
 {
-	size_t idx;
+	size_t idx = 0;
 
 	for (idx = 0; idx < count; idx++) {
 		if (attrs[idx].type == id) {
@@ -88,8 +88,8 @@ static const uint8_t nist_secp521r1_der[] = {
 int ck_ec_params_attr_from_tee_curve(CK_ATTRIBUTE *attrs, size_t count,
 					 uint32_t curve)
 {
-	void *der;
-	size_t size;
+	void *der = NULL;
+	size_t size = 0;
 
 	switch (curve) {
 	case TEE_ECC_CURVE_NIST_P192:
@@ -122,8 +122,8 @@ int ck_ec_params_attr_from_tee_curve(CK_ATTRIBUTE *attrs, size_t count,
 int ck_ec_params_attr_from_tee_algo(CK_ATTRIBUTE *attrs, size_t count,
 					 uint32_t algo)
 {
-	void *der;
-	size_t size;
+	void *der = NULL;
+	size_t size = 0;
 
 	switch (algo) {
 	case TEE_ALG_ECDSA_P192:
@@ -157,9 +157,9 @@ int ck_ec_params_attr_from_tee_algo(CK_ATTRIBUTE *attrs, size_t count,
 static TEEC_Result ta_crypt_cmd_reset_operation(ADBG_Case_t *c, TEEC_Session *s,
 						TEE_OperationHandle oph)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -179,9 +179,9 @@ static TEEC_Result ta_crypt_cmd_copy_operation(ADBG_Case_t *c,
 					       TEE_OperationHandle dst_oph,
 					       TEE_OperationHandle src_oph)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)dst_oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)dst_oph;
@@ -206,9 +206,9 @@ static TEEC_Result ta_crypt_cmd_digest_update(ADBG_Case_t *c, TEEC_Session *s,
 					      const void *chunk,
 					      size_t chunk_size)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -235,9 +235,9 @@ static TEEC_Result ta_crypt_cmd_digest_do_final(ADBG_Case_t *c, TEEC_Session *s,
 						size_t chunk_len, void *hash,
 						size_t *hash_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -272,9 +272,9 @@ static TEE_Result ta_crypt_cmd_set_operation_key2(ADBG_Case_t *c,
 						  TEE_ObjectHandle key1,
 						  TEE_ObjectHandle key2)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -302,9 +302,9 @@ static TEEC_Result ta_crypt_cmd_mac_init(ADBG_Case_t *c, TEEC_Session *s,
 					 TEE_OperationHandle oph,
 					 const void *iv, size_t iv_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -334,9 +334,9 @@ static TEEC_Result ta_crypt_cmd_mac_update(ADBG_Case_t *c, TEEC_Session *s,
 					   TEE_OperationHandle oph,
 					   const void *chunk, size_t chunk_size)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -366,9 +366,9 @@ static TEEC_Result ta_crypt_cmd_mac_final_compute(ADBG_Case_t *c,
 						  void *hash,
 						  size_t *hash_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -401,9 +401,9 @@ static TEEC_Result ta_crypt_cmd_cipher_init(ADBG_Case_t *c, TEEC_Session *s,
 					    TEE_OperationHandle oph,
 					    const void *iv, size_t iv_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -435,9 +435,9 @@ static TEEC_Result ta_crypt_cmd_cipher_update(ADBG_Case_t *c, TEEC_Session *s,
 					      const void *src, size_t src_len,
 					      void *dst, size_t *dst_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -473,9 +473,9 @@ static TEEC_Result ta_crypt_cmd_cipher_do_final(ADBG_Case_t *c,
 						void *dst,
 						size_t *dst_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -509,9 +509,9 @@ static TEEC_Result ta_crypt_cmd_random_number_generate(ADBG_Case_t *c,
 						       void *buf,
 						       size_t blen)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	op.params[0].tmpref.buffer = buf;
 	op.params[0].tmpref.size = blen;
@@ -538,9 +538,9 @@ static TEEC_Result ta_crypt_cmd_ae_init(ADBG_Case_t *c, TEEC_Session *s,
 					size_t tag_len, size_t aad_len,
 					size_t payload_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -569,9 +569,9 @@ static TEEC_Result ta_crypt_cmd_ae_update_aad(ADBG_Case_t *c, TEEC_Session *s,
 					      TEE_OperationHandle oph,
 					      const void *aad, size_t aad_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -601,9 +601,9 @@ static TEEC_Result ta_crypt_cmd_ae_update(ADBG_Case_t *c,
 					  void *dst,
 					  size_t *dst_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -639,9 +639,9 @@ static TEEC_Result ta_crypt_cmd_ae_encrypt_final(ADBG_Case_t *c,
 						 size_t *dst_len, void *tag,
 						 size_t *tag_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -683,9 +683,9 @@ static TEEC_Result ta_crypt_cmd_ae_decrypt_final(ADBG_Case_t *c,
 						 void *dst, size_t *dst_len,
 						 const void *tag, size_t tag_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)oph <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)oph;
@@ -729,11 +729,11 @@ static TEEC_Result ta_crypt_cmd_asymmetric_operate(ADBG_Case_t *c,
 						   void *dst,
 						   size_t *dst_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
-	uint8_t *buf;
-	size_t blen;
+	uint32_t ret_orig = 0;
+	uint8_t *buf = NULL;
+	size_t blen = 0;
 
 	res = pack_attrs(params, paramCount, &buf, &blen);
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, res))
@@ -827,11 +827,11 @@ static TEEC_Result ta_crypt_cmd_asymmetric_verify(ADBG_Case_t *c,
 						  const void *signature,
 						  size_t signature_len)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
-	uint8_t *buf;
-	size_t blen;
+	uint32_t ret_orig = 0;
+	uint8_t *buf = NULL;
+	size_t blen = 0;
 
 	res = pack_attrs(params, paramCount, &buf, &blen);
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, res))
@@ -873,9 +873,9 @@ static TEEC_Result ta_crypt_cmd_get_object_value_attribute(ADBG_Case_t *c,
 							   uint32_t *valuea,
 							   uint32_t *valueb)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
+	uint32_t ret_orig = 0;
 
 	assert((uintptr_t)o <= UINT32_MAX);
 	op.params[0].value.a = (uint32_t)(uintptr_t)o;
@@ -906,11 +906,11 @@ static TEEC_Result ta_crypt_cmd_generate_key(ADBG_Case_t *c,
 					     const TEE_Attribute *params,
 					     uint32_t paramCount)
 {
-	TEEC_Result res;
+	TEEC_Result res = TEEC_ERROR_GENERIC;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
-	uint32_t ret_orig;
-	uint8_t *buf;
-	size_t blen;
+	uint32_t ret_orig = 0;
+	uint8_t *buf = NULL;
+	size_t blen = 0;
 
 	res = pack_attrs(params, paramCount, &buf, &blen);
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, res))
@@ -1046,9 +1046,9 @@ static const struct xtest_hash_case hash_cases[] = {
 
 static void xtest_tee_test_4001(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	size_t n;
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	size_t n = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -1057,10 +1057,10 @@ static void xtest_tee_test_4001(ADBG_Case_t *c)
 
 
 	for (n = 0; n < ARRAY_SIZE(hash_cases); n++) {
-		TEE_OperationHandle op1;
-		TEE_OperationHandle op2;
-		uint8_t out[64];
-		size_t out_size;
+		TEE_OperationHandle op1 = TEE_HANDLE_NULL;
+		TEE_OperationHandle op2 = TEE_HANDLE_NULL;
+		uint8_t out[64] = { };
+		size_t out_size = 0;
 
 		Do_ADBG_BeginSubCase(c, "Hash case %d algo 0x%x",
 				     (int)n, (unsigned int)hash_cases[n].algo);
@@ -1620,11 +1620,20 @@ struct xtest_mac_case {
 	size_t in_len;
 	const uint8_t *out;
 	size_t out_len;
+	bool multiple_incr;
 };
 
-#define XTEST_MAC_CASE(algo, key_type, key, in_incr, in, out) \
+#define XTEST_MAC_CASE_1(algo, key_type, key, in_incr, in, out) \
 	{ (algo), (key_type), (key), ARRAY_SIZE(key), \
-	  (in_incr), (in), ARRAY_SIZE(in), (out), ARRAY_SIZE(out) }
+	  (in_incr), (in), ARRAY_SIZE(in), (out), ARRAY_SIZE(out), false }
+
+#define XTEST_MAC_CASE_MULT(algo, key_type, key, in_incr, in, out) \
+	{ (algo), (key_type), (key), ARRAY_SIZE(key), \
+	  (in_incr), (in), ARRAY_SIZE(in), (out), ARRAY_SIZE(out), true }
+
+#define XTEST_MAC_CASE(algo, key_type, key, in_incr, in, out) \
+	XTEST_MAC_CASE_1((algo), (key_type), (key), (in_incr), (in), (out)), \
+	XTEST_MAC_CASE_MULT((algo), (key_type), (key), (in_incr), (in), (out))
 
 #define XTEST_MAC_CBC_CASE(algo, key_type, vect, in_incr) \
 	XTEST_MAC_CASE((algo), (key_type), \
@@ -1694,14 +1703,14 @@ static const struct xtest_mac_case mac_cases[] = {
 
 static void xtest_tee_test_4002(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	TEE_OperationHandle op1;
-	TEE_OperationHandle op2;
-	TEE_ObjectHandle key_handle;
-	uint8_t out[64];
-	size_t out_size;
-	uint32_t ret_orig;
-	size_t n;
+	TEEC_Session session = { };
+	TEE_OperationHandle op1 = TEE_HANDLE_NULL;
+	TEE_OperationHandle op2 = TEE_HANDLE_NULL;
+	TEE_ObjectHandle key_handle = TEE_HANDLE_NULL;
+	uint8_t out[64] = { };
+	size_t out_size = 0;
+	uint32_t ret_orig = 0;
+	size_t n = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -1709,8 +1718,9 @@ static void xtest_tee_test_4002(ADBG_Case_t *c)
 		return;
 
 	for (n = 0; n < ARRAY_SIZE(mac_cases); n++) {
-		TEE_Attribute key_attr;
-		size_t key_size;
+		TEE_Attribute key_attr = { };
+		size_t key_size = 0;
+		size_t offs = 0;
 
 		Do_ADBG_BeginSubCase(c, "MAC case %d algo 0x%x",
 				     (int)n, (unsigned int)mac_cases[n].algo);
@@ -1759,11 +1769,19 @@ static void xtest_tee_test_4002(ADBG_Case_t *c)
 			ta_crypt_cmd_mac_init(c, &session, op1, NULL, 0)))
 			goto out;
 
+		offs = 0;
 		if (mac_cases[n].in != NULL) {
-			if (!ADBG_EXPECT_TEEC_SUCCESS(c,
-				ta_crypt_cmd_mac_update(c, &session, op1,
-					mac_cases[n].in, mac_cases[n].in_incr)))
-				goto out;
+			while (offs + mac_cases[n].in_incr <
+					mac_cases[n].in_len) {
+				if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+					ta_crypt_cmd_mac_update(c, &session,
+						op1, mac_cases[n].in + offs,
+						mac_cases[n].in_incr)))
+					goto out;
+				offs += mac_cases[n].in_incr;
+				if (!mac_cases[n].multiple_incr)
+					break;
+			}
 		}
 
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -1774,8 +1792,8 @@ static void xtest_tee_test_4002(ADBG_Case_t *c)
 		memset(out, 0, sizeof(out));
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			ta_crypt_cmd_mac_final_compute(c, &session, op2,
-				mac_cases[n].in + mac_cases[n].in_incr,
-				mac_cases [n].in_len - mac_cases[n].in_incr,
+				mac_cases[n].in + offs,
+				mac_cases [n].in_len - offs,
 				out, &out_size)))
 			goto out;
 
@@ -2049,14 +2067,14 @@ static int get_ck_mac_case(size_t mac_case_index, CK_MECHANISM_PTR *mechanism,
 
 void run_xtest_tee_test_4211(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_OBJECT_HANDLE key_handle;
-	uint8_t out[64];
-	CK_ULONG out_size;
-	size_t n;
+	CK_OBJECT_HANDLE key_handle = CK_INVALID_HANDLE;
+	uint8_t out[64] = { };
+	CK_ULONG out_size = 0;
+	size_t n = 0;
 	int close_subcase = 0;
-	struct xtest_mac_case const *test;
+	struct xtest_mac_case const *test = NULL;
 
 	rv = C_OpenSession(slot, CKF_SERIAL_SESSION | CKF_RW_SESSION,
 			   NULL, 0, &session);
@@ -2777,15 +2795,15 @@ static const struct xtest_ciph_case ciph_cases[] = {
 
 static void xtest_tee_test_4003(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	TEE_OperationHandle op;
+	TEEC_Session session = { };
+	TEE_OperationHandle op = TEE_HANDLE_NULL;
 	TEE_ObjectHandle key1_handle = TEE_HANDLE_NULL;
 	TEE_ObjectHandle key2_handle = TEE_HANDLE_NULL;
-	uint8_t out[2048];
-	size_t out_size;
-	size_t out_offs;
-	uint32_t ret_orig;
-	size_t n;
+	uint8_t out[2048] = { };
+	size_t out_size = 0;
+	size_t out_offs = 0;
+	uint32_t ret_orig = 0;
+	size_t n = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -2793,10 +2811,9 @@ static void xtest_tee_test_4003(ADBG_Case_t *c)
 		return;
 
 	for (n = 0; n < ARRAY_SIZE(ciph_cases); n++) {
-		TEE_Attribute key_attr;
-		size_t key_size;
-		size_t op_key_size;
-
+		TEE_Attribute key_attr = { };
+		size_t key_size = 0;
+		size_t op_key_size = 0;
 
 		Do_ADBG_BeginSubCase(c, "Cipher case %zu algo 0x%x line %zu",
 				     n, (unsigned int)ciph_cases[n].algo,
@@ -3061,13 +3078,13 @@ static int get_ck_ciph_case(size_t ciph_case_index, CK_MECHANISM_PTR *mechanism,
 
 void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot)
 {
-	CK_RV rv;
+	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_OBJECT_HANDLE key_handle;
-	uint8_t out[2048];
-	CK_ULONG out_size;
-	CK_ULONG out_offs;
-	size_t n;
+	CK_OBJECT_HANDLE key_handle = CK_INVALID_HANDLE;
+	uint8_t out[2048] = { };
+	CK_ULONG out_size = 0;
+	CK_ULONG out_offs = 0;
+	size_t n = 0;
 	int close_subcase = 0;
 
 	rv = C_OpenSession(slot, CKF_SERIAL_SESSION | CKF_RW_SESSION,
@@ -3187,11 +3204,11 @@ out:
 
 static void xtest_tee_test_4004(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	uint8_t buf1[45] = { 0 };
-	uint8_t buf2[45] = { 0 };
-	static const uint8_t zeros[45] = { 0 };
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	uint8_t buf1[45] = { };
+	uint8_t buf2[45] = { };
+	static const uint8_t zeros[45];
 
 	Do_ADBG_BeginSubCase(c, "TEE get random");
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -3311,15 +3328,15 @@ static const struct xtest_ae_case ae_cases[] = {
 
 static void xtest_tee_test_4005(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	TEE_OperationHandle op;
+	TEEC_Session session = { };
+	TEE_OperationHandle op = TEE_HANDLE_NULL;
 	TEE_ObjectHandle key_handle = TEE_HANDLE_NULL;
-	TEE_Attribute key_attr;
-	uint8_t out[512];
-	size_t out_size;
-	size_t out_offs;
-	uint32_t ret_orig;
-	size_t n;
+	TEE_Attribute key_attr = { };
+	uint8_t out[512] = { };
+	size_t out_size = 0;
+	size_t out_offs = 0;
+	uint32_t ret_orig = 0;
+	size_t n = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -4661,7 +4678,7 @@ static bool create_key(ADBG_Case_t *c, TEEC_Session *s,
 		       TEE_Attribute *attrs, size_t num_attrs,
 		       TEE_ObjectHandle *handle)
 {
-	size_t n;
+	size_t n = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		ta_crypt_cmd_allocate_transient_object(c, s, key_type,
@@ -4674,11 +4691,8 @@ static bool create_key(ADBG_Case_t *c, TEEC_Session *s,
 		return false;
 
 	for (n = 0; n < num_attrs; n++) {
-		uint8_t out[512];
-		size_t out_size;
-
-		out_size = sizeof(out);
-		memset(out, 0, sizeof(out));
+		uint8_t out[512] = { };
+		size_t out_size = sizeof(out);
 
 		if (attrs[n].attributeID == TEE_ATTR_ECC_CURVE)
 			continue;
@@ -4706,25 +4720,25 @@ static bool create_key(ADBG_Case_t *c, TEEC_Session *s,
 
 static void xtest_tee_test_4006(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
+	TEEC_Session session = { };
 	TEE_OperationHandle op = TEE_HANDLE_NULL;
 	TEE_ObjectHandle priv_key_handle = TEE_HANDLE_NULL;
 	TEE_ObjectHandle pub_key_handle = TEE_HANDLE_NULL;
-	TEE_Attribute key_attrs[8];
-	TEE_Attribute algo_params[1];
-	size_t num_algo_params;
-	uint8_t out[512];
-	size_t out_size;
-	uint8_t out_enc[512];
-	size_t out_enc_size;
-	uint8_t ptx_hash[TEE_MAX_HASH_SIZE];
+	TEE_Attribute key_attrs[8] = { };
+	TEE_Attribute algo_params[1] = { };
+	size_t num_algo_params = 0;
+	uint8_t out[512] = { };
+	size_t out_size = 0;
+	uint8_t out_enc[512] = { };
+	size_t out_enc_size = 0;
+	uint8_t ptx_hash[TEE_MAX_HASH_SIZE] = { };
 	size_t ptx_hash_size = 0;
-	size_t max_key_size;
-	size_t num_key_attrs;
-	uint32_t ret_orig;
-	size_t n;
-	uint32_t curve;
-	uint32_t hash_algo;
+	size_t max_key_size = 0;
+	size_t num_key_attrs = 0;
+	uint32_t ret_orig = 0;
+	size_t n = 0;
+	uint32_t curve = 0;
+	uint32_t hash_algo = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -5826,10 +5840,10 @@ static bool test_keygen_attributes(ADBG_Case_t *c, TEEC_Session *s,
 				   TEE_ObjectHandle key, uint32_t key_size,
 				   struct key_attrs *attrs, size_t num_attrs)
 {
-	uint8_t out[2048];
-	size_t out_size;
-	size_t n;
-	size_t m;
+	uint8_t out[2048] = { };
+	size_t out_size = 0;
+	size_t n = 0;
+	size_t m = 0;
 
 	for (m = 0; m < num_attrs; m++) {
 		if ((attrs[m].attr & TEE_ATTR_BIT_VALUE) == 0) {
@@ -5854,8 +5868,8 @@ static bool test_keygen_attributes(ADBG_Case_t *c, TEEC_Session *s,
 					return false;
 			}
 		} else {
-			uint32_t a;
-			uint32_t b;
+			uint32_t a = 0;
+			uint32_t b = 0;
 
 			if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 				ta_crypt_cmd_get_object_value_attribute(c, s, key,
@@ -5950,7 +5964,7 @@ static bool generate_and_test_key(ADBG_Case_t *c, TEEC_Session *s,
 				  uint32_t key_size,
 				  TEE_Attribute *params, size_t param_count)
 {
-	TEE_ObjectHandle key;
+	TEE_ObjectHandle key = TEE_HANDLE_NULL;
 	bool ret_val = true;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
@@ -6156,10 +6170,8 @@ static const struct key_types_noparam keygen_symmetric_key_types[] = {
 
 static void xtest_tee_test_4007_symmetric(ADBG_Case_t *c)
 {
-	TEEC_Session session;
+	TEEC_Session session = { };
 	uint32_t ret_orig = 0;
-
-	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -6190,10 +6202,8 @@ static const struct key_types_noparam keygen_rsa_key_types[] = {
 
 static void xtest_tee_test_4007_rsa(ADBG_Case_t *c)
 {
-	TEEC_Session session;
+	TEEC_Session session = { };
 	uint32_t ret_orig = 0;
-
-	memset(&session, 0, sizeof(session));
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -6249,7 +6259,7 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 		uint32_t min_size = key_types[n].min_size;
 		uint32_t max_size = key_types[n].max_size;
 		uint32_t quanta = key_types[n].quanta;
-		CK_MECHANISM ck_mecha;
+		CK_MECHANISM ck_mecha = { };
 		CK_ATTRIBUTE *ck_attrs = NULL;
 		CK_ULONG ck_count = 0;
 		CK_ATTRIBUTE *ck_attrs2 = NULL;
@@ -6411,10 +6421,10 @@ void run_xtest_tee_test_4216(ADBG_Case_t *c, CK_SLOT_ID slot)
 
 static void xtest_tee_test_4007_dh(ADBG_Case_t *c)
 {
-	TEEC_Session session;
-	uint32_t ret_orig;
-	size_t n;
-	size_t param_count;
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	size_t n = 0;
+	size_t param_count = 0;
 	/*
 	 * Note that the key size parameter is not used when creating the keys
 	 * but specifying these sizes make it possible to test the expected size
@@ -6422,7 +6432,7 @@ static void xtest_tee_test_4007_dh(ADBG_Case_t *c)
 	 * size of p or what is specified in private_bits or the equvivalent
 	 * size of the subprime parameter.
 	 */
-	TEE_Attribute params[4];
+	TEE_Attribute params[4] = { };
 
 #define XTEST_DH_GK_DATA(vect) \
 	ARRAY(vect ## _p), \
@@ -6535,11 +6545,11 @@ ADBG_CASE_DEFINE(regression, 4007_dh, xtest_tee_test_4007_dh,
 
 static void xtest_tee_test_4007_dsa(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	size_t n;
-	size_t param_count;
-	TEE_Attribute params[4];
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	size_t n = 0;
+	size_t param_count = 0;
+	TEE_Attribute params[4] = { };
 
 #define XTEST_DSA_GK_DATA(vect) \
 	ARRAY(vect ## _p), \
@@ -6608,11 +6618,11 @@ ADBG_CASE_DEFINE(regression, 4007_dsa, xtest_tee_test_4007_dsa,
 
 static void xtest_tee_test_4007_ecc(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	size_t n;
-	size_t param_count;
-	TEE_Attribute params[4];
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	size_t n = 0;
+	size_t param_count = 0;
+	TEE_Attribute params[4] = { };
 
 	static const struct {
 		unsigned level;
@@ -6688,15 +6698,15 @@ ADBG_CASE_DEFINE(regression, 4007_ecc, xtest_tee_test_4007_ecc,
 
 static void xtest_tee_test_4008(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	TEE_OperationHandle op;
-	TEE_ObjectHandle key_handle;
-	TEE_ObjectHandle sv_handle;
-	TEE_Attribute params[4];
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	TEE_OperationHandle op = TEE_HANDLE_NULL;
+	TEE_ObjectHandle key_handle = TEE_HANDLE_NULL;
+	TEE_ObjectHandle sv_handle = TEE_HANDLE_NULL;
+	TEE_Attribute params[4] = { };
 	size_t param_count = 0;
-	uint8_t out[2048];
-	size_t out_size;
+	uint8_t out[2048] = { };
+	size_t out_size = 0;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -6787,18 +6797,18 @@ ADBG_CASE_DEFINE(regression, 4008, xtest_tee_test_4008,
 
 static void xtest_tee_test_4009(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	TEE_OperationHandle op;
-	TEE_ObjectHandle key_handle;
-	TEE_ObjectHandle sv_handle;
-	TEE_Attribute params[4];
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	TEE_OperationHandle op = TEE_HANDLE_NULL;
+	TEE_ObjectHandle key_handle = TEE_HANDLE_NULL;
+	TEE_ObjectHandle sv_handle = TEE_HANDLE_NULL;
+	TEE_Attribute params[4] = { };
 	size_t param_count = 0;
-	uint8_t out[2048];
-	size_t out_size;
-	uint32_t size_bytes;
-	uint32_t i;
-	struct derive_key_ecdh_t *pt;
+	uint8_t out[2048] = { };
+	size_t out_size = 0;
+	uint32_t size_bytes = 0;
+	uint32_t i = 0;
+	struct derive_key_ecdh_t *pt = NULL;
 
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 		xtest_teec_open_session(&session, &crypt_user_ta_uuid, NULL,
@@ -7071,9 +7081,9 @@ noerror:
 
 static void xtest_tee_test_4010(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
-	TEE_ObjectHandle o;
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	TEE_ObjectHandle o = TEE_HANDLE_NULL;
 	static const uint8_t large_key[1024] = { 1, 2, 3, 4, 5, 6 };
 	static const TEE_Attribute attr = {
 		.attributeID = TEE_ATTR_SECRET_VALUE,
@@ -7103,21 +7113,21 @@ ADBG_CASE_DEFINE(regression, 4010, xtest_tee_test_4010,
 
 static void xtest_tee_test_4011(ADBG_Case_t *c)
 {
-	TEEC_Session s = { 0 };
+	TEEC_Session s = { };
 	size_t key_size = 512;
-	TEE_ObjectHandle key;
-	TEE_OperationHandle ops;
-	TEE_OperationHandle opv;
-	TEE_OperationHandle ope;
-	TEE_OperationHandle opd;
-	uint32_t ret_orig;
-	uint8_t in[TEE_SHA1_HASH_SIZE];
-	uint8_t out[1024];
-	uint8_t tmp[1024];
-	size_t out_size;
-	size_t tmp_size;
-	size_t n;
-	size_t m;
+	TEE_ObjectHandle key = TEE_HANDLE_NULL;
+	TEE_OperationHandle ops = TEE_HANDLE_NULL;
+	TEE_OperationHandle opv = TEE_HANDLE_NULL;
+	TEE_OperationHandle ope = TEE_HANDLE_NULL;
+	TEE_OperationHandle opd = TEE_HANDLE_NULL;
+	uint32_t ret_orig = 0;
+	uint8_t in[TEE_SHA1_HASH_SIZE] = { };
+	uint8_t out[1024] = { };
+	uint8_t tmp[1024] = { };
+	size_t out_size = 0;
+	size_t tmp_size = 0;
+	size_t n = 0;
+	size_t m = 0;
 	size_t i = 0;
 
 	/* Setup session, initialize message to sign, create a keypair */
@@ -7253,13 +7263,13 @@ ADBG_CASE_DEFINE(regression, 4011, xtest_tee_test_4011,
 #ifdef CFG_SYSTEM_PTA
 static void xtest_tee_test_4012(ADBG_Case_t *c)
 {
-	TEEC_Session session = { 0 };
-	uint32_t ret_orig;
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
 	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
 	/* Fortuna PRNG requires seed <= 32 bytes */
-	uint8_t pool_input[32] = {};
-	time_t t;
-	struct tm tm_local;
+	uint8_t pool_input[32] = { };
+	time_t t = 0;
+	struct tm tm_local = { };
 
 	t = time(NULL);
 	tm_local = *localtime(&t);
@@ -7289,4 +7299,50 @@ static void xtest_tee_test_4012(ADBG_Case_t *c)
 }
 ADBG_CASE_DEFINE(regression, 4012, xtest_tee_test_4012,
 		"Test seeding RNG entropy");
+
+static void xtest_tee_test_4013(ADBG_Case_t *c)
+{
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint8_t key[32] = { };
+	uint8_t extra_data[32] = { };
+
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_NONE,
+					 TEEC_NONE,
+					 TEEC_NONE,
+					 TEEC_NONE);
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			xtest_teec_open_session(&session, &crypt_user_ta_uuid,
+						NULL, &ret_orig)))
+		return;
+
+	(void)ADBG_EXPECT_TEEC_SUCCESS(c,
+			TEEC_InvokeCommand(&session,
+					  TA_CRYPT_CMD_DERIVE_TA_UNIQUE_KEY,
+					  &op,
+					  &ret_orig));
+
+	/* Negative test using non-secure memory */
+	memset(&op, 0, sizeof(op));
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
+					 TEEC_MEMREF_TEMP_OUTPUT,
+					 TEEC_NONE,
+					 TEEC_NONE);
+
+	op.params[0].tmpref.buffer = extra_data;
+	op.params[0].tmpref.size = sizeof(extra_data);
+	op.params[1].tmpref.buffer = key;
+	op.params[1].tmpref.size = sizeof(key);
+	(void)ADBG_EXPECT_TEEC_RESULT(c,
+			TEEC_ERROR_SECURITY,
+			TEEC_InvokeCommand(&session,
+					   TA_CRYPT_CMD_DERIVE_TA_UNIQUE_KEY_SHM,
+					   &op,
+					   &ret_orig));
+
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 4013, xtest_tee_test_4013,
+		"Test generation of device unique TA keys");
 #endif /*CFG_SYSTEM_PTA*/

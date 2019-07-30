@@ -28,6 +28,7 @@
 #include <aes_taf.h>
 #include <arith_taf.h>
 #include <cryp_taf.h>
+#include <derive_key_taf.h>
 #include <mbedtls_taf.h>
 #include <seed_rng_taf.h>
 #include <sha2_taf.h>
@@ -89,7 +90,6 @@ TEE_Result TA_InvokeCommandEntryPoint(void *pSessionContext,
 	static bool use_fptr = false;
 
 	(void)pSessionContext;
-
 
 	switch (nCommandID) {
 	case TA_CRYPT_CMD_SHA224:
@@ -234,6 +234,10 @@ TEE_Result TA_InvokeCommandEntryPoint(void *pSessionContext,
 #ifdef CFG_SYSTEM_PTA
 	case TA_CRYPT_CMD_SEED_RNG_POOL:
 		return seed_rng_pool(nParamTypes, pParams);
+	case TA_CRYPT_CMD_DERIVE_TA_UNIQUE_KEY:
+		return derive_ta_unique_key_test(nParamTypes, pParams);
+	case TA_CRYPT_CMD_DERIVE_TA_UNIQUE_KEY_SHM:
+		return derive_ta_unique_key_test_shm(nParamTypes, pParams);
 #endif
 	case TA_CRYPT_CMD_ARITH_NEW_VAR:
 		return ta_entry_arith_new_var(nParamTypes, pParams);
@@ -305,7 +309,7 @@ TEE_Result TA_InvokeCommandEntryPoint(void *pSessionContext,
 
 static TEE_Result set_global(uint32_t param_types, TEE_Param params[4])
 {
-	int i;
+	int i = 0;
 
 	/* Param 0 is a memref, input/output */
 	if (TEE_PARAM_TYPE_VALUE_INPUT != TEE_PARAM_TYPE_GET(param_types, 0))
@@ -323,7 +327,7 @@ static TEE_Result set_global(uint32_t param_types, TEE_Param params[4])
 
 static TEE_Result get_global(uint32_t param_types, TEE_Param params[4])
 {
-	int i;
+	int i = 0;
 
 	/* Param 0 is a memref, input/output */
 	if (TEE_PARAM_TYPE_VALUE_OUTPUT != TEE_PARAM_TYPE_GET(param_types, 0))

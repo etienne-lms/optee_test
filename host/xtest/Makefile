@@ -65,6 +65,7 @@ srcs +=	adbg/src/adbg_case.c \
 	regression_8000.c \
 	regression_8100.c \
 	sha_perf.c \
+	stats.c \
 	xtest_helpers.c \
 	xtest_main.c \
 	xtest_test.c
@@ -112,6 +113,8 @@ CFLAGS += -I../../ta/enc_fs/include
 CFLAGS += -I../../ta/os_test/include
 CFLAGS += -I../../ta/rpc_test/include
 CFLAGS += -I../../ta/sims/include
+CFLAGS += -I../../ta/miss/include
+CFLAGS += -I../../ta/sims_keepalive/include
 CFLAGS += -I../../ta/storage_benchmark/include
 CFLAGS += -I../../ta/concurrent/include
 CFLAGS += -I../../ta/concurrent_large/include
@@ -161,6 +164,8 @@ CFLAGS += -Wall -Wcast-align -Werror \
 	  -Wmissing-prototypes -Wnested-externs -Wpointer-arith \
 	  -Wshadow -Wstrict-prototypes -Wswitch-default \
 	  -Wwrite-strings \
+	  -Wno-declaration-after-statement \
+	  -Wno-unsafe-loop-optimizations \
 	  -Wno-missing-field-initializers -Wno-format-zero-length
 endif
 
