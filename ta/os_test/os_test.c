@@ -25,6 +25,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include <compiler.h>
+#include <dlfcn.h>
 #include <setjmp.h>
 #include <stdint.h>
 #include <string.h>
@@ -464,7 +465,8 @@ static TEE_Result test_mem_access_right(uint32_t param_types,
 	if (res == TEE_SUCCESS)
 		return TEE_ERROR_GENERIC;
 
-	res = TEE_OpenTASession(&test_uuid, 0, 0, NULL, &sess, &ret_orig);
+	res = TEE_OpenTASession(&test_uuid, TEE_TIMEOUT_INFINITE, 0, NULL,
+				&sess, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("test_mem_access_right: TEE_OpenTASession failed\n");
 		goto cleanup_return;
@@ -476,7 +478,8 @@ static TEE_Result test_mem_access_right(uint32_t param_types,
 	l_params[0].memref.size = sizeof(buf);
 	l_params[1].memref.buffer = NULL;
 	l_params[1].memref.size = 0;
-	res = TEE_InvokeTACommand(sess, 0, TA_OS_TEST_CMD_PARAMS_ACCESS,
+	res = TEE_InvokeTACommand(sess, TEE_TIMEOUT_INFINITE,
+				  TA_OS_TEST_CMD_PARAMS_ACCESS,
 				  l_pts, l_params, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("test_mem_access_right: TEE_InvokeTACommand failed\n");
@@ -750,7 +753,8 @@ TEE_Result ta_entry_client_with_timeout(uint32_t param_types,
 		return TEE_ERROR_BAD_PARAMETERS;
 	}
 
-	res = TEE_OpenTASession(&os_test_uuid, 0, 0, NULL, &sess, &ret_orig);
+	res = TEE_OpenTASession(&os_test_uuid, TEE_TIMEOUT_INFINITE, 0, NULL,
+				&sess, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG(
 		"ta_entry_client_with_timeout: TEE_OpenTASession failed\n");
@@ -803,7 +807,8 @@ TEE_Result ta_entry_client(uint32_t param_types, TEE_Param params[4])
 		return TEE_ERROR_OUT_OF_MEMORY;
 	TEE_MemMove(in, sha256_in, sizeof(sha256_in));
 
-	res = TEE_OpenTASession(&crypt_uuid, 0, 0, NULL, &sess, &ret_orig);
+	res = TEE_OpenTASession(&crypt_uuid, TEE_TIMEOUT_INFINITE, 0, NULL,
+				&sess, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("ta_entry_client: TEE_OpenTASession failed\n");
 		goto cleanup_return;
@@ -816,7 +821,8 @@ TEE_Result ta_entry_client(uint32_t param_types, TEE_Param params[4])
 	l_params[1].memref.buffer = out;
 	l_params[1].memref.size = sizeof(out);
 
-	res = TEE_InvokeTACommand(sess, 0, TA_CRYPT_CMD_SHA256, l_pts, l_params,
+	res = TEE_InvokeTACommand(sess, TEE_TIMEOUT_INFINITE,
+				  TA_CRYPT_CMD_SHA256, l_pts, l_params,
 				  &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("ta_entry_client: TEE_InvokeTACommand failed\n");
@@ -889,6 +895,7 @@ TEE_Result ta_entry_bad_mem_access(uint32_t param_types, TEE_Param params[4])
 {
 	long int stack = 0;
 	long int stack_addr = (long int)&stack;
+	void (*volatile null_fn_ptr)(void) = NULL;
 
 	if (param_types != TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT, 0, 0, 0) &&
 	    param_types != TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
@@ -897,13 +904,13 @@ TEE_Result ta_entry_bad_mem_access(uint32_t param_types, TEE_Param params[4])
 
 	switch (params[0].value.a) {
 	case 1:
-		*((uint32_t *) 0) = 0;
+		*((volatile uint32_t *)0) = 0;
 		break;
 	case 2:
 		*((uint32_t *)(stack_addr + 0x40000000)) = 0;
 		break;
 	case 3:
-		((void (*)(void))0) ();
+		null_fn_ptr();
 		break;
 	case 4:
 		((void (*)(void))(stack_addr + 0x40000000)) ();
@@ -946,7 +953,8 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 	if (param_types != TEE_PARAM_TYPES(0, 0, 0, 0))
 		return TEE_ERROR_GENERIC;
 
-	res = TEE_OpenTASession(&test_uuid, 0, 0, NULL, &sess, &ret_orig);
+	res = TEE_OpenTASession(&test_uuid, TEE_TIMEOUT_INFINITE, 0, NULL,
+				&sess, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("TEE_OpenTASession failed");
 		goto cleanup_return;
@@ -973,7 +981,8 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 	 * TA will compute: out = ++inout + in
 	 * Expected values after this step: in: 5, inout: 11, out: 16
 	 */
-	res = TEE_InvokeTACommand(sess, 0, TA_OS_TEST_CMD_TA2TA_MEMREF_MIX,
+	res = TEE_InvokeTACommand(sess, TEE_TIMEOUT_INFINITE,
+				  TA_OS_TEST_CMD_TA2TA_MEMREF_MIX,
 				  l_pts, l_params, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("TEE_InvokeTACommand failed");
@@ -990,7 +999,8 @@ TEE_Result ta_entry_ta2ta_memref(uint32_t param_types, TEE_Param params[4])
 	 * TA will compute: out = ++inout + in
 	 * Expected values after this step: in: 6, inout: 13, out: 19
 	 */
-	res = TEE_InvokeTACommand(sess, 0, TA_OS_TEST_CMD_TA2TA_MEMREF_MIX,
+	res = TEE_InvokeTACommand(sess, TEE_TIMEOUT_INFINITE,
+				  TA_OS_TEST_CMD_TA2TA_MEMREF_MIX,
 				  l_pts, l_params, &ret_orig);
 	if (res != TEE_SUCCESS) {
 		EMSG("TEE_InvokeTACommand failed");
@@ -1085,4 +1095,76 @@ TEE_Result ta_entry_call_lib_panic(uint32_t param_types,
 	os_test_shlib_panic();
 
 	return TEE_ERROR_GENERIC;
+}
+
+TEE_Result ta_entry_call_lib_dl(uint32_t param_types __maybe_unused,
+				TEE_Param params[4] __unused)
+{
+	int (*add_func)(int a, int b) = NULL;
+	TEE_Result res = TEE_ERROR_GENERIC;
+	void *handle = NULL;
+	void *hnull = NULL;
+
+	if (param_types != TEE_PARAM_TYPES(TEE_PARAM_TYPE_NONE,
+					   TEE_PARAM_TYPE_NONE,
+					   TEE_PARAM_TYPE_NONE,
+					   TEE_PARAM_TYPE_NONE))
+		return TEE_ERROR_BAD_PARAMETERS;
+
+	handle = dlopen("b3091a65-9751-4784-abf7-0298a7cc35ba",
+			RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
+	if (!handle)
+		return TEE_ERROR_OUT_OF_MEMORY;
+
+	add_func = dlsym(handle, "os_test_shlib_dl_add");
+	if (!add_func)
+		goto err;
+	if (add_func(3, 4) != 7)
+		goto err;
+
+	hnull = dlopen(NULL, RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
+	if (!hnull) {
+		res = TEE_ERROR_OUT_OF_MEMORY;
+		goto err;
+	}
+
+	add_func = dlsym(hnull, "os_test_shlib_dl_add");
+	if (!add_func)
+		goto err;
+	if (add_func(5, 6) != 11)
+		goto err;
+
+	res = TEE_SUCCESS;
+	dlclose(hnull);
+err:
+	dlclose(handle);
+	return res;
+}
+
+TEE_Result ta_entry_call_lib_dl_panic(uint32_t param_types __maybe_unused,
+				      TEE_Param params[4] __unused)
+{
+	int (*panic_func)(void) = NULL;
+	void *handle = NULL;
+	TEE_Result res = TEE_ERROR_GENERIC;
+
+	if (param_types != TEE_PARAM_TYPES(TEE_PARAM_TYPE_NONE,
+					   TEE_PARAM_TYPE_NONE,
+					   TEE_PARAM_TYPE_NONE,
+					   TEE_PARAM_TYPE_NONE))
+		return TEE_ERROR_BAD_PARAMETERS;
+
+	handle = dlopen("b3091a65-9751-4784-abf7-0298a7cc35ba",
+			RTLD_NOW | RTLD_GLOBAL | RTLD_NODELETE);
+	if (!handle)
+		return res;
+
+	panic_func = dlsym(handle, "os_test_shlib_dl_panic");
+	if (!panic_func)
+		goto err;
+	panic_func();
+	return TEE_ERROR_GENERIC;
+err:
+	dlclose(handle);
+	return res;
 }

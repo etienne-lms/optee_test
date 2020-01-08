@@ -1561,7 +1561,7 @@ static void test_panic_ca_to_ta(ADBG_Case_t *c, const TEEC_UUID *uuid,
 		goto bail1;
 
 	exp_counter = multi_instance ? 0 : 1;
-	if (ADBG_EXPECT(c, exp_counter, counter))
+	if (!ADBG_EXPECT(c, exp_counter, counter))
 		goto bail1;
 
 	if (!ADBG_EXPECT_TEEC_RESULT(c, TEEC_ERROR_TARGET_DEAD,
@@ -1578,7 +1578,7 @@ static void test_panic_ca_to_ta(ADBG_Case_t *c, const TEEC_UUID *uuid,
 		goto bail1;
 
 	/* Attempt to open a session on panicked context */
-	if (!ADBG_EXPECT_TEEC_RESULT(c, TEEC_ERROR_TARGET_DEAD,
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			xtest_teec_open_session(&cs[1], uuid, NULL,
 						&ret_orig)))
 		goto bail1;
@@ -1602,7 +1602,8 @@ static void test_panic_ca_to_ta(ADBG_Case_t *c, const TEEC_UUID *uuid,
 	if (!ADBG_EXPECT_TEEC_SUCCESS(c, sims_get_counter(&cs[2], &counter)))
 		goto bail2;
 
-	if (!ADBG_EXPECT(c, 0, counter))
+	exp_counter = multi_instance ? 0 : 1;
+	if (!ADBG_EXPECT(c, exp_counter, counter))
 		goto bail2;
 
 bail2:
@@ -1717,3 +1718,29 @@ static void xtest_tee_test_1021(ADBG_Case_t *c)
 }
 ADBG_CASE_DEFINE(regression, 1021, xtest_tee_test_1021,
 		 "Test panic context release");
+
+static void xtest_tee_test_1022(ADBG_Case_t *c)
+{
+	TEEC_Session session = { 0 };
+	uint32_t ret_orig = 0;
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			xtest_teec_open_session(&session, &os_test_ta_uuid,
+				NULL, &ret_orig)))
+		return;
+
+	(void)ADBG_EXPECT_TEEC_SUCCESS(c,
+		TEEC_InvokeCommand(&session, TA_OS_TEST_CMD_CALL_LIB_DL, NULL,
+				   &ret_orig));
+
+	(void)ADBG_EXPECT_TEEC_RESULT(c,
+		TEEC_ERROR_TARGET_DEAD,
+		TEEC_InvokeCommand(&session, TA_OS_TEST_CMD_CALL_LIB_DL_PANIC,
+				   NULL, &ret_orig));
+
+	(void)ADBG_EXPECT_TEEC_ERROR_ORIGIN(c, TEEC_ORIGIN_TEE, ret_orig);
+
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 1022, xtest_tee_test_1022,
+		"Test dlopen()/dlsym()/dlclose() API");
