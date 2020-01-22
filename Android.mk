@@ -24,8 +24,8 @@ LOCAL_SHARED_LIBRARIES := libteec
 
 TA_DIR ?= /vendor/lib/optee_armtz
 
-ifeq ($(CFG_SECURE_KEY_SERVICES),y)
-LOCAL_SHARED_LIBRARIES += libsks
+ifeq ($(CFG_PKCS11_TA),y)
+LOCAL_SHARED_LIBRARIES += libckteec
 endif
 
 srcs := regression_1000.c
@@ -80,7 +80,7 @@ $(eval $(call my-embed-file,regression_8100_mid_crt,cert/mid.crt))
 $(eval $(call my-embed-file,regression_8100_my_crt,cert/my.crt))
 $(eval $(call my-embed-file,regression_8100_my_csr,cert/my.csr))
 
-ifeq ($(CFG_SECURE_KEY_SERVICES),y)
+ifeq ($(CFG_PKCS11_TA),y)
 srcs += regression_4100.c
 endif
 
@@ -116,7 +116,7 @@ ifneq ($(TA_DIR),)
 LOCAL_CFLAGS += -DTA_DIR=\"$(TA_DIR)\"
 endif
 
-ifeq ($(CFG_SECURE_KEY_SERVICES),y)
+ifeq ($(CFG_PKCS11_TA),y)
 LOCAL_CFLAGS += -DCFG_SECURE_KEY_SERVICES
 endif
 

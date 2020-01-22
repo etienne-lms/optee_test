@@ -108,7 +108,7 @@ target_link_libraries (${PROJECT_NAME}
 	PRIVATE teec
 	PRIVATE m
 	PRIVATE ${OPENSSL_PRIVATE_LINK}
-	PRIVATE sks
+	PRIVATE ckteec
 )
 
 ################################################################################

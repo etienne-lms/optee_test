@@ -31,7 +31,7 @@
 
 #ifdef CFG_SECURE_KEY_SERVICES
 #include <pkcs11.h>
-#include <sks_ck_debug.h>
+#include <ck_debug.h>
 #endif
 
 #include <assert.h>
@@ -5439,7 +5439,7 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 	size_t out_enc_size = 0;
 	size_t n = 0;
 	int subcase = 0;
-	/* Compute hash through cryp test TA (until SKS supports hashes */
+	/* Compute hash through cryp test TA (until PKCS11 TA supports hashes) */
 	uint8_t ptx_hash[TEE_MAX_HASH_SIZE] = { 0 };
 	size_t ptx_hash_size = 0;
 	TEEC_Session crypta_session;
@@ -6241,7 +6241,7 @@ static CK_ATTRIBUTE cktest_keygen_noparams_rsa_pub[] = {
 static CK_ATTRIBUTE cktest_keygen_noparams_rsa_priv[] = {
 	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_PRIVATE_KEY},
 			sizeof(CK_OBJECT_CLASS) },
-	/* Intentionally not key type: libsks will guess the key type */
+	/* Intentionally not key type: libckteec will guess the key type */
 	{ CKA_SIGN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_DECRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 };
@@ -6321,7 +6321,7 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			return;
 
-		/* libsks guesses the key type in RSA or EC cases */
+		/* libckteec guesses the key type in RSA or EC cases */
 		if (ck_key_type != CKK_RSA) {
 			if (set_ck_attr(ck_attrs, ck_count, CKA_KEY_TYPE,
 					(void **)&ck_key_type,

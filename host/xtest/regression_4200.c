@@ -16,7 +16,7 @@
 #include <inttypes.h>
 #include <malloc.h>
 #include <pkcs11.h>
-#include <sks_ck_debug.h>
+#include <ck_debug.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -141,7 +141,7 @@ bail:
 /* Login currently as SO, uzer login not yet supported */
 static char test_token_so_pin[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
 static char test_token_user_pin[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
-static char test_token_label[32] = "sks test token";
+static char test_token_label[32] = "PKCS11 TA test token";
 
 static CK_RV init_test_token(CK_SLOT_ID slot)
 {
@@ -230,8 +230,8 @@ CK_RV logout_test_token(CK_SESSION_HANDLE session)
 /*
  * The test below belongs to the regression 42xx test. As it rely on test
  * vectors define for the 40xx test, this test sequence in implemented here.
- * The test below check compliance of crypto algorithms called throug the SKS
- * PKCS#11 interface.
+ * The test below check compliance of crypto algorithms called throug the
+ * PKCS11 TA interface.
  */
 void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot);
 void run_xtest_tee_test_4211(ADBG_Case_t *c, CK_SLOT_ID slot);

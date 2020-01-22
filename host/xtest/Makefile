@@ -87,12 +87,12 @@ ifeq ($(CFG_SECURE_DATA_PATH),y)
 srcs += sdp_basic.c
 endif
 
-ifeq ($(CFG_SECURE_KEY_SERVICES),y)
+ifeq ($(CFG_PKCS11_TA),y)
 srcs += regression_4200.c
-OPTEE_SKS_HEADERS ?= ../../../optee_client/libsks/include
+OPTEE_CKTEEC_HEADERS ?= ../../../optee_client/libckteec/include
 CFLAGS += -DCFG_SECURE_KEY_SERVICES
-CFLAGS += -I$(OPTEE_SKS_HEADERS)
-LDFLAGS += -L$(OPTEE_CLIENT_EXPORT)/lib -lsks
+CFLAGS += -I$(OPTEE_CKTEEC_HEADERS)
+LDFLAGS += -L$(OPTEE_CLIENT_EXPORT)/lib -lckteec
 endif
 
 ifdef CFG_GP_PACKAGE_PATH
