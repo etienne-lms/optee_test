@@ -6315,6 +6315,10 @@ static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,
 			continue;
 		}
 
+		if (key_types[n].level > level) {
+			continue;
+		}
+
 		Do_ADBG_BeginSubCase(c, "Generate %s key", key_types[n].name);
 
 		rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
