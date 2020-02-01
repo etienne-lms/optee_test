@@ -531,14 +531,13 @@ static void xtest_tee_test_4204(ADBG_Case_t *c)
 	memcpy(label32, test_token_label, sizeof(label32));
 
 	if (token_info.flags & CKF_TOKEN_INITIALIZED) {
-
+		/* Check we know the SO PIN */
 		Do_ADBG_BeginSubCase(c, "Init already initialized token");
 
-		// "Token is already initialized.\n"
 		// TODO: skip this if token is about to lock
 
 		rv = C_InitToken(slot, (CK_UTF8CHAR_PTR)test_token_so_pin,
-				sizeof(test_token_so_pin) - 1,
+				 sizeof(test_token_so_pin) - 1,
 				 (CK_UTF8CHAR_PTR)label32);
 		if (!ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=, CKR_OK))
 			goto bail;
@@ -614,9 +613,7 @@ static void xtest_tee_test_4204(ADBG_Case_t *c)
 		}
 
 	} else {
-		//("Token was not yet initialized.\n");
-		/*  We must provision the SO PIN */
-
+		/* We must provision the SO PIN */
 		Do_ADBG_BeginSubCase(c, "Init brand new token");
 
 		rv = init_test_token(slot);
@@ -628,11 +625,11 @@ static void xtest_tee_test_4204(ADBG_Case_t *c)
 			goto bail;
 
 		if (!ADBG_EXPECT_TRUE(c, !!(token_info.flags &
-						CKF_TOKEN_INITIALIZED)) ||
+					    CKF_TOKEN_INITIALIZED)) ||
 		    !ADBG_EXPECT_TRUE(c, !(token_info.flags &
-						CKF_ERROR_STATE)) ||
+					   CKF_ERROR_STATE)) ||
 		    !ADBG_EXPECT_TRUE(c, !(token_info.flags &
-						CKF_USER_PIN_INITIALIZED))) {
+					   CKF_USER_PIN_INITIALIZED))) {
 			rv = CKR_GENERAL_ERROR;
 			goto bail;
 		}
@@ -1387,11 +1384,12 @@ static void test_create_objects_in_session(ADBG_Case_t *c, int readwrite)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
-	if (readwrite)
+	if (readwrite) {
 		rv = C_DestroyObject(session, token_obj_hld);
 
-	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto bail;
+		if (!ADBG_EXPECT_CK_OK(c, rv))
+			goto bail;
+	}
 
 	rv = C_DestroyObject(session, session_obj_hld);
 	ADBG_EXPECT_CK_OK(c, rv);
