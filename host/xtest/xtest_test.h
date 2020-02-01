@@ -17,7 +17,7 @@
 #include <adbg.h>
 #include <tee_client_api.h>
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 #include <pkcs11.h>
 #endif
 
@@ -42,7 +42,7 @@ ADBG_ENUM_TABLE_DECLARE(TEEC_ErrorOrigin);
 #define ADBG_EXPECT_TEEC_ERROR_ORIGIN(c, exp, got) \
 	ADBG_EXPECT_ENUM(c, exp, got, ADBG_EnumTable_TEEC_ErrorOrigin)
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /* CK_RV */
 ADBG_ENUM_TABLE_DECLARE(CK_RV);
 

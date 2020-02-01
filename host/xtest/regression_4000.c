@@ -29,14 +29,14 @@
 #include <regression_4000_data.h>
 #include <nist/186-2ecdsatestvectors.h>
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 #include <pkcs11.h>
 #include <ck_debug.h>
 #endif
 
 #include <assert.h>
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 int ck_ec_params_attr_from_tee_curve(CK_ATTRIBUTE *attrs, size_t count,
 					 uint32_t curve);
 int ck_ec_params_attr_from_tee_algo(CK_ATTRIBUTE *attrs, size_t count,
@@ -152,7 +152,7 @@ int ck_ec_params_attr_from_tee_algo(CK_ATTRIBUTE *attrs, size_t count,
 
 	return set_ck_attr(attrs, count, CKA_EC_PARAMS, der, size);
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 static TEEC_Result ta_crypt_cmd_reset_operation(ADBG_Case_t *c, TEEC_Session *s,
 						TEE_OperationHandle oph)
@@ -1831,7 +1831,7 @@ out:
 ADBG_CASE_DEFINE(regression, 4002, xtest_tee_test_4002,
 		"Test TEE Internal API MAC operations");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /*
  * The test below belongs to the regression 41xx test. As it relies on test
  * vectors defined for the 40xx test, this test sequence in implemented here.
@@ -2184,7 +2184,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 static const uint8_t ciph_data_aes_key1[] = {
 	0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, /* 01234567 */
@@ -2936,7 +2936,7 @@ out:
 ADBG_CASE_DEFINE(regression, 4003, xtest_tee_test_4003,
 		"Test TEE Internal API cipher operations");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /*
  * The test below belongs to the regression 41xx test. As it relies on test
  * vectors defined for the 40xx test, this test sequence in implemented here.
@@ -3200,7 +3200,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 static void xtest_tee_test_4004(ADBG_Case_t *c)
 {
@@ -3484,7 +3484,7 @@ out:
 ADBG_CASE_DEFINE(regression, 4005, xtest_tee_test_4005,
 		"Test TEE Internal API Authenticated Encryption operations");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /*
  * The test below belongs to the regression 41xx test. As it relies on test
  * vectors defined for the 40xx test, this test sequence in implemented here.
@@ -3801,7 +3801,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 struct xtest_ac_case {
 	unsigned int level;
@@ -5206,7 +5206,7 @@ out:
 ADBG_CASE_DEFINE(regression, 4006, xtest_tee_test_4006,
 		"Test TEE Internal API Asymmetric Cipher operations");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /*
  * The test below belongs to the regression 41xx test. As it relies on test
  * vectors defined for the 40xx test, this test sequence is implemented here.
@@ -5821,7 +5821,7 @@ out:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 #define KEY_ATTR(x, y) { #x, (x), y }
 
@@ -6029,7 +6029,7 @@ static bool generate_and_test_key(ADBG_Case_t *c, TEEC_Session *s,
 	return ret_val;
 }
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 static bool cktest_generate_and_test_key(ADBG_Case_t *c,
 					 CK_SESSION_HANDLE session,
 					 CK_MECHANISM *ck_mechanism,
@@ -6114,7 +6114,7 @@ static bool cktest_generate_and_test_key(ADBG_Case_t *c,
 bail:
 	return rv == CKR_OK;
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 struct key_types_noparam {
 	unsigned level;
@@ -6219,7 +6219,7 @@ static void xtest_tee_test_4007_rsa(ADBG_Case_t *c)
 ADBG_CASE_DEFINE(regression, 4007_rsa, xtest_tee_test_4007_rsa,
 		"Test TEE Internal API Generate RSA key");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 
 /* Valid template to generate a generic secret */
 static CK_ATTRIBUTE cktest_keygen_noparams_symkey[] = {
@@ -6421,7 +6421,7 @@ void run_xtest_tee_test_4216(ADBG_Case_t *c, CK_SLOT_ID slot)
 	cktest_keygen_noparams(c, slot, keygen_rsa_key_types,
 			       ARRAY_SIZE(keygen_rsa_key_types));
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 static void xtest_tee_test_4007_dh(ADBG_Case_t *c)
 {
@@ -6689,7 +6689,7 @@ static void xtest_tee_test_4007_ecc(ADBG_Case_t *c)
 ADBG_CASE_DEFINE(regression, 4007_ecc, xtest_tee_test_4007_ecc,
 		"Test TEE Internal API Generate ECC key");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /*
  * TODO: ECC key gen
  *
@@ -6931,7 +6931,7 @@ noerror:
 ADBG_CASE_DEFINE(regression, 4009, xtest_tee_test_4009,
 		"Test TEE Internal API Derive key ECDH");
 
-#ifdef CFG_SECURE_KEY_SERVICES
+#ifdef CFG_PKCS11_TA
 /*
  * The test below belongs to the regression 41xx test. As it relies on test
  * vectors defined for the 40xx test, this test sequence is implemented here.
@@ -7082,7 +7082,7 @@ noerror:
 	rv = C_CloseSession(session);
 	ADBG_EXPECT_CK_OK(c, rv);
 }
-#endif /*CFG_SECURE_KEY_SERVICES*/
+#endif /*CFG_PKCS11_TA*/
 
 static void xtest_tee_test_4010(ADBG_Case_t *c)
 {

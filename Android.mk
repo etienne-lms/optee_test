@@ -117,7 +117,7 @@ LOCAL_CFLAGS += -DTA_DIR=\"$(TA_DIR)\"
 endif
 
 ifeq ($(CFG_PKCS11_TA),y)
-LOCAL_CFLAGS += -DCFG_SECURE_KEY_SERVICES
+LOCAL_CFLAGS += -DCFG_PKCS11_TA
 endif
 
 ## $(OPTEE_BIN) is the path of tee.bin like

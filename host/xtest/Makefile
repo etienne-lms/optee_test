@@ -90,7 +90,7 @@ endif
 ifeq ($(CFG_PKCS11_TA),y)
 srcs += regression_4200.c
 OPTEE_CKTEEC_HEADERS ?= ../../../optee_client/libckteec/include
-CFLAGS += -DCFG_SECURE_KEY_SERVICES
+CFLAGS += -DCFG_PKCS11_TA
 CFLAGS += -I$(OPTEE_CKTEEC_HEADERS)
 LDFLAGS += -L$(OPTEE_CLIENT_EXPORT)/lib -lckteec
 endif

@@ -81,7 +81,7 @@ if (CFG_SECURE_DATA_PATH)
 	list (APPEND SRC sdp_basic.c)
 endif()
 
-if (CFG_SECURE_KEY_SERVICES)
+if (CFG_PKCS11_TA)
 	list (APPEND SRC regression_4200.c)
 endif()
 
