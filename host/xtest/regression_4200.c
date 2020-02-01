@@ -980,7 +980,7 @@ static void xtest_tee_test_4205(ADBG_Case_t *c)
 		goto bail;
 
 	rv = C_EncryptInit(session, &cktest_aes_cbc_mechanism, obj_hdl);
-	if (!ADBG_EXPECT_CK_RESULT(c, rv, CKR_KEY_FUNCTION_NOT_PERMITTED))
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_KEY_FUNCTION_NOT_PERMITTED, rv))
 		goto bail;
 
 	rv = C_DestroyObject(session, obj_hdl);
@@ -1376,7 +1376,7 @@ static void test_create_objects_in_session(ADBG_Case_t *c, int readwrite)
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto bail;
 	} else {
-		if (!ADBG_EXPECT_CK_RESULT(c, rv, CKR_SESSION_READ_ONLY))
+		if (!ADBG_EXPECT_CK_RESULT(c, CKR_SESSION_READ_ONLY, rv))
 			goto bail;
 	}
 
@@ -1561,7 +1561,7 @@ static CK_RV cipher_init_final(ADBG_Case_t *c, CK_SESSION_HANDLE session,
 	if (mode == TEE_MODE_DECRYPT)
 		rv = C_DecryptInit(session, mechanism, object);
 
-	if (!ADBG_EXPECT_CK_RESULT(c, rv, expected_rc)) {
+	if (!ADBG_EXPECT_CK_RESULT(c, expected_rc, rv)) {
 		rv = CKR_GENERAL_ERROR;
 		goto bail;
 	}
@@ -1851,11 +1851,11 @@ static void xtest_tee_test_4213(ADBG_Case_t *c)
 
 	/* Closing session with out bound and invalid IDs (or negative ID) */
 	rv = C_CloseSession(sessions[n - 1] + 1024);
-	ADBG_EXPECT_CK_RESULT(c, rv, CKR_SESSION_HANDLE_INVALID);
+	ADBG_EXPECT_CK_RESULT(c, CKR_SESSION_HANDLE_INVALID, rv);
 	rv = C_CloseSession(CK_INVALID_HANDLE);
-	ADBG_EXPECT_CK_RESULT(c, rv, CKR_SESSION_HANDLE_INVALID);
+	ADBG_EXPECT_CK_RESULT(c, CKR_SESSION_HANDLE_INVALID, rv);
 	rv = C_CloseSession(~0);
-	ADBG_EXPECT_CK_RESULT(c, rv, CKR_SESSION_HANDLE_INVALID);
+	ADBG_EXPECT_CK_RESULT(c, CKR_SESSION_HANDLE_INVALID, rv);
 
 	/* Closing each session: all related resources shall be free */
 	for (n = 0; n < ARRAY_SIZE(sessions); n++) {
@@ -2272,11 +2272,11 @@ static void xtest_tee_test_4214(ADBG_Case_t *c)
 	Do_ADBG_BeginSubCase(c, "Various invalid invocation cases");
 
 	rv = C_FindObjectsFinal(session);
-	ADBG_EXPECT_CK_RESULT(c, rv, CKR_OPERATION_NOT_INITIALIZED);
+	ADBG_EXPECT_CK_RESULT(c, CKR_OPERATION_NOT_INITIALIZED, rv);
 
 	rv = C_FindObjects(session,
 			   obj_found, ARRAY_SIZE(obj_found), &hdl_count);
-	ADBG_EXPECT_CK_RESULT(c, rv, CKR_OPERATION_NOT_INITIALIZED);
+	ADBG_EXPECT_CK_RESULT(c, CKR_OPERATION_NOT_INITIALIZED, rv);
 
 	rv = C_FindObjectsInit(session, cktest_findobj_pers_aes,
 				ARRAY_SIZE(cktest_findobj_pers_aes));

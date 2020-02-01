@@ -2121,7 +2121,7 @@ void run_xtest_tee_test_4211(ADBG_Case_t *c, CK_SLOT_ID slot)
 			out_size = 1;
 			rv = C_SignFinal(session, out, &out_size);
 
-			if (!ADBG_EXPECT_CK_RESULT(c, rv, CKR_BUFFER_TOO_SMALL))
+			if (!ADBG_EXPECT_CK_RESULT(c, CKR_BUFFER_TOO_SMALL, rv))
 				goto out;
 
 			/* Get to full output */
