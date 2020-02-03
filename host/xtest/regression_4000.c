@@ -5473,7 +5473,7 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 	        if (tee_alg2ckmt(tv->algo, &mechanism)) {
 			unsigned int algo = TEE_ALG_GET_MAIN_ALG(tv->algo);
 
-			Do_ADBG_Log("Skip test case %zu algo 0x%x line %zu (%s)",
+			Do_ADBG_Log("Skip test case %zu algo 0x%x line %zu (%s) todo!",
 				     n, (unsigned int)tv->algo,
 				     tv->line,
 				     algo == TEE_MAIN_ALGO_RSA ? "RSA" :
