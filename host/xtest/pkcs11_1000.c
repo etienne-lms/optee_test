@@ -151,8 +151,12 @@ static void xtest_tee_test_1001(ADBG_Case_t *c)
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto out;
 
-		if (mecha_count == 0)
+		if (mecha_count == 0) {
+			if (level)
+				Do_ADBG_Log("Token #%zu: no mechanism", i);
+
 			continue;
+		}
 
 		free(mecha_types);
 		mecha_types = calloc(mecha_count, sizeof(*mecha_types));
@@ -169,11 +173,57 @@ static void xtest_tee_test_1001(ADBG_Case_t *c)
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto out;
 
+		if (level)
+			Do_ADBG_Log("Token #%zu mechanism capabilities:", i);
+
 		for (j = 0; j < mecha_count; j++) {
+			size_t pos = 0;
+			size_t k = 0;
+			/* 1024byte should be enough, if not truncates  */
+			char log[1024] = { 0 };
+
 			rv = C_GetMechanismInfo(slot, mecha_types[j], &mecha_info);
 			if (!ADBG_EXPECT_CK_OK(c, rv))
 				goto out;
+
+			/*  Verbose output on high levels */
+			if (level == 0)
+				continue;
+
+			pos = snprintf(&log[0], sizeof(log),
+				       "%-30s Key size [%03lu %03lu]",
+				       ckm2str(mecha_types[j]),
+				       mecha_info.ulMinKeySize,
+				       mecha_info.ulMaxKeySize);
+
+			if (pos > sizeof(log)) {
+				Do_ADBG_Log("| Error: internal short buffer");
+				continue;
+			}
+
+			if (!mecha_info.flags) {
+				Do_ADBG_Log("| %s\tAll flags down", &log[0]);
+				continue;
+			}
+
+			if (pos < sizeof(log))
+				pos += snprintf(&log[pos], sizeof(log) - pos,
+						"\tFlags: ");
+
+			for (k = 0; k < 32; k++) {
+				if (!(mecha_info.flags & (1UL << k)) ||
+				    pos >= sizeof(log))
+					continue;
+
+				pos += snprintf(&log[pos], sizeof(log) - pos,
+						"%s ",
+						mecha_ckf2str(1UL << k));
+			}
+			Do_ADBG_Log("| %s", &log[0]);
 		}
+
+		if (level)
+			Do_ADBG_Log("`--- end token mechanism capabilities");
 	}
 
 	Do_ADBG_EndSubCase(c, NULL);
