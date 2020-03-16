@@ -139,8 +139,8 @@ bail:
 }
 
 /* Login currently as SO, uzer login not yet supported */
-static char test_token_so_pin[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
-static char test_token_user_pin[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 };
+static char test_token_so_pin[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8 , 9, 10,};
+static char test_token_user_pin[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 static char test_token_label[32] = "PKCS11 TA test token";
 
 static CK_RV init_test_token(CK_SLOT_ID slot)
@@ -514,9 +514,9 @@ static void xtest_tee_test_4204(ADBG_Case_t *c)
 	CK_TOKEN_INFO token_info;
 	char label32[32] = { 0 };
 	/* Same content as test_token_so_pin[] but 1 more byte */
-	char pin1[] = { 0, 1, 2, 3, 0, 5, 6, 7, 8, 9, 10 };
+	char pin1[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, };
 	/* Same content as test_token_so_pin[] but 1 different byte */
-	char pin2[] = { 0, 1, 2, 3, 4, 5, 6, 0, 8 };
+	char pin2[] = { 0, 1, 2, 3, 4, 5, 6, 6, 8, 9, 10, };
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
 
