@@ -6159,13 +6159,13 @@ static const struct key_types_noparam keygen_symmetric_key_types[] = {
 	{ 0, "DES", TEE_TYPE_DES, 56, 56, 56 /* valid size 56 */ },
 	{ 0, "DES3", TEE_TYPE_DES3, 56, 112,
 	  168 /* valid sizes 112, 168 */ },
-	{ 0, "HMAC-MD5", TEE_TYPE_HMAC_MD5, 8, 64, 512 },
-	{ 0, "HMAC-SHA1", TEE_TYPE_HMAC_SHA1, 8, 80, 512 },
-	{ 0, "HMAC-SHA224", TEE_TYPE_HMAC_SHA224, 8, 112, 512 },
+	{ 1, "HMAC-MD5", TEE_TYPE_HMAC_MD5, 8, 64, 512 },
+	{ 1, "HMAC-SHA1", TEE_TYPE_HMAC_SHA1, 8, 80, 512 },
+	{ 1, "HMAC-SHA224", TEE_TYPE_HMAC_SHA224, 8, 112, 512 },
 	{ 0, "HMAC-SHA256", TEE_TYPE_HMAC_SHA256, 8, 192, 1024 },
-	{ 0, "HMAC-SHA384", TEE_TYPE_HMAC_SHA384, 8, 256, 1024 },
-	{ 0, "HMAC-SHA512", TEE_TYPE_HMAC_SHA512, 8, 256, 1024 },
-	{ 0, "Generic secret", TEE_TYPE_GENERIC_SECRET, 8, 128, 4096 },
+	{ 1, "HMAC-SHA384", TEE_TYPE_HMAC_SHA384, 8, 256, 1024 },
+	{ 1, "HMAC-SHA512", TEE_TYPE_HMAC_SHA512, 8, 256, 1024 },
+	{ 1, "Generic secret", TEE_TYPE_GENERIC_SECRET, 8, 128, 4096 },
 };
 
 static void xtest_tee_test_4007_symmetric(ADBG_Case_t *c)
