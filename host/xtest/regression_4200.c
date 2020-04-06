@@ -2505,4 +2505,4 @@ ADBG_CASE_DEFINE(regression, 4216, xtest_tee_test_4216,
 ADBG_CASE_DEFINE(regression, 4217, xtest_tee_test_4217,
 		"PKCS11: Compliance of asymmetric ciphering processings");
 ADBG_CASE_DEFINE(regression, 4218, xtest_tee_test_4218,
-		"PKCS11: Compliance of ECDH processings (weak: key not checked)");
+		"PKCS11: Compliance of ECDH processings");

@@ -7000,11 +7000,8 @@ void run_xtest_tee_test_4218(ADBG_Case_t *c, CK_SLOT_ID slot)
 						sizeof(CK_OBJECT_CLASS) },
 			{ CKA_VALUE_LEN, &(CK_ULONG){0}, sizeof(CK_ULONG) },
 		};
-		uint8_t derived_key_value[16] = { 0 };
-		CK_ATTRIBUTE get_derived_key_template[] = {
-			{ CKA_VALUE, &(CK_VOID_PTR){&derived_key_value},
-						sizeof(derived_key_value) },
-		};
+		uint8_t derived_key_value[128] = { 0 };
+		CK_ATTRIBUTE get_derived_key_template = { };
 		CK_MECHANISM ck_mechanism;
 		CK_ECDH1_DERIVE_PARAMS *edch_params = NULL;
 		CK_ULONG ck_key_bit_size = 0;
@@ -7080,21 +7077,37 @@ void run_xtest_tee_test_4218(ADBG_Case_t *c, CK_SLOT_ID slot)
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto out;
 
-		memset(get_derived_key_template[0].pValue, 0,
-			get_derived_key_template[0].ulValueLen);
+		/* Check generated key value */
+		get_derived_key_template.type = CKA_VALUE;
+		get_derived_key_template.pValue = NULL;
+		get_derived_key_template.ulValueLen = 0;
 
 		rv = C_GetAttributeValue(session, derived_key_handle,
-					 &get_derived_key_template[0], 1);
-#if 0
-		if (!ADBG_EXPECT_CK_OK(c, rv)) {
-			goto out;
+					 &get_derived_key_template, 1);
+
+		if (!ADBG_EXPECT_CK_OK(c, rv))
+			goto destroy_object;
+
+		if (!ADBG_EXPECT_COMPARE_UNSIGNED(c,
+					get_derived_key_template.ulValueLen,
+					<=, sizeof(derived_key_value)))
+			goto destroy_object;
+
+		memset(derived_key_value, 0, sizeof(derived_key_value));
+		get_derived_key_template.pValue = &derived_key_value;
+
+		rv = C_GetAttributeValue(session, derived_key_handle,
+					 &get_derived_key_template, 1);
+
+		if (!ADBG_EXPECT_CK_OK(c, rv))
+			goto destroy_object;
 
 		if (!ADBG_EXPECT_BUFFER(c, pt->out, size_bytes,
-					get_derived_key_template[0].pValue,
-					get_derived_key_template[0].ulValueLen))
+					get_derived_key_template.pValue,
+					get_derived_key_template.ulValueLen))
 			goto out;
-#endif
 
+destroy_object:
 		rv = C_DestroyObject(session, priv_key_handle);
 
 		if (!ADBG_EXPECT_CK_OK(c, rv))
