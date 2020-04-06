@@ -3096,6 +3096,7 @@ void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot)
 		CK_ATTRIBUTE_PTR ck_key = NULL;
 		CK_MECHANISM_PTR mechanism = NULL;
 		CK_ULONG attr_count = 0;
+		size_t incr_step = 0;
 
 		if (get_ck_ciph_case(n, &mechanism, &ck_key, &attr_count)) {
 			Do_ADBG_Log("Skip case %zu algo 0x%x line %zu",
@@ -3109,6 +3110,43 @@ void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot)
 					ckm2str(mechanism->mechanism),
 					ciph_cases[n].line);
 		close_subcase = 1;
+
+		/*
+		 * PKCS#11 put constraints on in/out size for some algo
+		 * That GPD TEE (and original xtest did not.
+		 */
+		incr_step = ciph_cases[n].in_incr;
+
+		switch (mechanism->mechanism) {
+		case CKM_AES_ECB:
+		case CKM_AES_CBC:
+			/* Must be a modulus of AES block size */
+			if (incr_step < 16)
+				incr_step = 16;
+			else
+				incr_step = incr_step - (incr_step % 16);
+			break;
+		case CKM_AES_CTS:
+			/* Must be at least AES block size */
+			Do_ADBG_Log("%zu %zu", incr_step, ciph_cases[n].in_len);
+			if (incr_step < 16)
+				incr_step = 16;
+			/*
+			 * Hacky: if less than 2 blocks, provide both at first
+			 * step. (These test uses 2 ciphering steps at most)
+			 */
+			if ((ciph_cases[n].in_len > 16) &&
+			    (ciph_cases[n].in_len < 32))
+				incr_step = ciph_cases[n].in_len;
+			break;
+		default:
+			break;
+		}
+		if (!ADBG_EXPECT_COMPARE_UNSIGNED(c, ciph_cases[n].in_len,
+						  >=, incr_step)) {
+			Do_ADBG_Log("Test failed since not applicable!");
+			continue;
+		}
 
 		rv = C_CreateObject(session, ck_key, attr_count, &key_handle);
 
@@ -3129,16 +3167,12 @@ void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot)
 		memset(out, 0, sizeof(out));
 
 		if (ciph_cases[n].mode == TEE_MODE_ENCRYPT)
-			rv = C_EncryptUpdate(session,
-					     (void *)ciph_cases[n].in,
-					     ciph_cases[n].in_incr,
-					     out, &out_size);
+			rv = C_EncryptUpdate(session, (void *)ciph_cases[n].in,
+					     incr_step, out, &out_size);
 
 		if (ciph_cases[n].mode == TEE_MODE_DECRYPT)
-			rv = C_DecryptUpdate(session,
-					     (void *)ciph_cases[n].in,
-					     ciph_cases[n].in_incr,
-					     out, &out_size);
+			rv = C_DecryptUpdate(session, (void *)ciph_cases[n].in,
+					     incr_step, out, &out_size);
 
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto out;
@@ -3146,36 +3180,37 @@ void run_xtest_tee_test_4210(ADBG_Case_t *c, CK_SLOT_ID slot)
 
 		if (ciph_cases[n].algo == TEE_ALG_AES_CTR)
 			ADBG_EXPECT_COMPARE_UNSIGNED(c, out_size, ==,
-				ciph_cases[n].in_incr);
+						     incr_step);
 
 		out_offs += out_size;
 		out_size = sizeof(out) - out_offs;
 
-		if (ciph_cases[n].mode == TEE_MODE_ENCRYPT)
-			rv = C_EncryptUpdate(session,
-				(void *)(ciph_cases[n].in +
-					 ciph_cases[n].in_incr),
-				ciph_cases[n].in_len - ciph_cases[n].in_incr,
-				out + out_offs, &out_size);
+		/* Run second part if any */
+		if (ciph_cases[n].in_len - incr_step > 0) {
+			if (ciph_cases[n].mode == TEE_MODE_ENCRYPT)
+				rv = C_EncryptUpdate(session,
+					(void *)(ciph_cases[n].in + incr_step),
+					ciph_cases[n].in_len - incr_step,
+					out + out_offs, &out_size);
 
-		if (ciph_cases[n].mode == TEE_MODE_DECRYPT)
-			rv = C_DecryptUpdate(session,
-				(void *)(ciph_cases[n].in +
-					 ciph_cases[n].in_incr),
-				ciph_cases[n].in_len - ciph_cases[n].in_incr,
-				out + out_offs, &out_size);
+			if (ciph_cases[n].mode == TEE_MODE_DECRYPT)
+				rv = C_DecryptUpdate(session,
+					(void *)(ciph_cases[n].in + incr_step),
+					ciph_cases[n].in_len - incr_step,
+					out + out_offs, &out_size);
 
-		if (!ADBG_EXPECT_CK_OK(c, rv))
-			goto out;
+			if (!ADBG_EXPECT_CK_OK(c, rv))
+				goto out;
 
-		out_offs += out_size;
-		out_size = sizeof(out) - out_offs;
+			out_offs += out_size;
+			out_size = sizeof(out) - out_offs;
+		}
 
 		if (ciph_cases[n].mode == TEE_MODE_ENCRYPT)
 			rv = C_EncryptFinal(session, out + out_offs, &out_size);
 
 		if (ciph_cases[n].mode == TEE_MODE_DECRYPT)
-			rv = C_DecryptFinal(session, out + out_offs,  &out_size);
+			rv = C_DecryptFinal(session, out + out_offs, &out_size);
 
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto out;
