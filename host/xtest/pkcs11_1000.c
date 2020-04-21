@@ -984,7 +984,6 @@ static void test_create_objects_in_session(ADBG_Case_t *c, int readwrite)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out;
 
-if (0) {
 	rv = C_CreateObject(session, cktest_token_object,
 			    ARRAY_SIZE(cktest_token_object),
 			    &token_obj_hld);
@@ -996,7 +995,6 @@ if (0) {
 		if (!ADBG_EXPECT_CK_RESULT(c, CKR_SESSION_READ_ONLY, rv))
 			goto out;
 	}
-}
 
 	rv = C_CreateObject(session, cktest_session_object,
 			    ARRAY_SIZE(cktest_session_object),
@@ -1005,14 +1003,12 @@ if (0) {
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out;
 
-if (0) {
 	if (readwrite) {
 		rv = C_DestroyObject(session, token_obj_hld);
 
 		if (!ADBG_EXPECT_CK_OK(c, rv))
 			goto out;
 	}
-}
 
 	rv = C_DestroyObject(session, session_obj_hld);
 	ADBG_EXPECT_CK_OK(c, rv);
@@ -1032,13 +1028,11 @@ static void xtest_pkcs11_test_1004(ADBG_Case_t *c)
 	Do_ADBG_EndSubCase(c, NULL);
 
 	Do_ADBG_BeginSubCase(c, "Create and destroy a persistent object");
-	if (0)
-		test_create_destroy_single_object(c, 1);
+	test_create_destroy_single_object(c, 1);
 	Do_ADBG_EndSubCase(c, NULL);
 
 	Do_ADBG_BeginSubCase(c, "Create and destroy a persistent object");
-	if (0)
-		test_create_destroy_session_objects(c);
+	test_create_destroy_session_objects(c);
 	Do_ADBG_EndSubCase(c, NULL);
 
 	Do_ADBG_BeginSubCase(c, "Create objects in a read-only session");
