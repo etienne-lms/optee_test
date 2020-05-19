@@ -309,7 +309,7 @@ static void *context_thread(void *arg)
 /*
  * Required by Global Platform test suite for v1.0
  */
-static uint32_t BIG_VALUE = 1024; /* BIG_SIZE */
+static uint8_t BIG_VALUE[1024] = { 0 }; /* BIG_SIZE */
 static uint32_t SIZE_LESSER_THAN_SIZE_VALUE01 = sizeof(VALUE01) - 1;
 
 /* "SMART-CSLT-TA-ER" */
