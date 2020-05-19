@@ -123,11 +123,12 @@ static TEEC_UUID UUID_Unknown = {
 			   TEEC_OpenSession(context, session, destination, \
 					    connectionMethod, connectionData, \
 					    operation, &ret_orig)); \
-		if ((returnOrigin != 0) && \
-		    (returnOrigin != TEEC_ORIGIN_ANY_NOT_TRUSTED_APP)) \
-			ADBG_EXPECT(c, returnOrigin, ret_orig); \
+		if (((uint32_t)returnOrigin != 0) && \
+		    ((uint32_t)returnOrigin != \
+			TEEC_ORIGIN_ANY_NOT_TRUSTED_APP)) \
+			ADBG_EXPECT(c, (uint32_t)returnOrigin, ret_orig); \
 		else \
-			ADBG_EXPECT_NOT(c, returnOrigin, ret_orig); \
+			ADBG_EXPECT_NOT(c, (uint32_t)returnOrigin, ret_orig); \
 	} while (0)
 
 #define OPERATION_TEEC_PARAM_TYPES(op, p0, p1, p2, p3) \
