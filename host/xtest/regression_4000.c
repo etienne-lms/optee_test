@@ -5259,7 +5259,10 @@ static CK_ATTRIBUTE rsa_key_pub_attr[] = {
 	{ CKA_VERIFY, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_ENCRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_MODULUS, (void *)NULL, 0 },
+	{ CKA_MODULUS_BITS, &(CK_ULONG){0}, sizeof(CK_ULONG) },
 	{ CKA_PUBLIC_EXPONENT, (void *)NULL, 0 },
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 static CK_UTF8CHAR label_rsa_priv[] = "Generic RSA private key for testing";
@@ -5278,6 +5281,8 @@ static CK_ATTRIBUTE rsa_key_priv_attr[] = {
 	{ CKA_EXPONENT_1, (void *)NULL, 0 },
 	{ CKA_EXPONENT_2, (void *)NULL, 0 },
 	{ CKA_COEFFICIENT, (void *)NULL, 0 },
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 static CK_ATTRIBUTE rsa_key_priv_attr2[] = {
@@ -5290,6 +5295,8 @@ static CK_ATTRIBUTE rsa_key_priv_attr2[] = {
 	{ CKA_MODULUS, (void *)NULL, 0 },
 	{ CKA_PUBLIC_EXPONENT, (void *)NULL, 0 },
 	{ CKA_PRIVATE_EXPONENT, (void *)NULL, 0 },
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 static CK_UTF8CHAR label_ec_pub[] = "Generic EC public key for testing";
@@ -5303,6 +5310,8 @@ static CK_ATTRIBUTE __unused cktest_ec_key_pub_attr[] = {
 	{ CKA_EC_POINT, (void *)NULL, 0 },		// to fill at runtime
 	{ CKA_VENDOR_EC_POINT_Y, (void *)NULL, 0 },	// to fill at runtime
 	{ CKA_VENDOR_EC_POINT_X, (void *)NULL, 0 },	// to fill at runtime
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 CK_UTF8CHAR label_ec_priv[] = "Generic EC private key for testing";
@@ -5319,6 +5328,7 @@ CK_ATTRIBUTE cktest_ec_key_priv_attr[] = {
 	{ CKA_VALUE, (void *)NULL, 0 },
 	{ CKA_VENDOR_EC_POINT_Y, (void *)NULL, 0 },	// to fill at runtime
 	{ CKA_VENDOR_EC_POINT_X, (void *)NULL, 0 },	// to fill at runtime
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 #define CKTEST_RSA_PSS_PARAMS(_label, _algo, _mgf)	\
@@ -5479,6 +5489,7 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 	size_t ptx_hash_size = 0;
 	TEEC_Session crypta_session;
 	uint32_t ret_orig = 0;
+	CK_ULONG modulus_bits_value = 0;
 
 	memset(&crypta_session, 0, sizeof(crypta_session));
 
@@ -5600,9 +5611,13 @@ void run_xtest_tee_test_4217(ADBG_Case_t *c, CK_SLOT_ID slot)
 				rsa_priv_count = ARRAY_SIZE(rsa_key_priv_attr2);
 			}
 
+			modulus_bits_value = tv->params.rsa.modulus_len * 8;
 			if (SET_CK_ATTR(rsa_key_pub_attr, CKA_MODULUS,
 					tv->params.rsa.modulus,
 					tv->params.rsa.modulus_len) ||
+			    SET_CK_ATTR(rsa_key_pub_attr, CKA_MODULUS_BITS,
+					&modulus_bits_value,
+					sizeof(modulus_bits_value)) ||
 			    SET_CK_ATTR(rsa_key_pub_attr, CKA_PUBLIC_EXPONENT,
 					tv->params.rsa.pub_exp,
 					tv->params.rsa.pub_exp_len)) {
@@ -6272,6 +6287,8 @@ static CK_ATTRIBUTE cktest_keygen_noparams_rsa_pub[] = {
 	{ CKA_VERIFY, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_ENCRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_MODULUS_BITS, &(CK_ULONG){0}, sizeof(CK_ULONG) },
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 static CK_ATTRIBUTE cktest_keygen_noparams_rsa_priv[] = {
 	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_PRIVATE_KEY},
@@ -6279,6 +6296,8 @@ static CK_ATTRIBUTE cktest_keygen_noparams_rsa_priv[] = {
 	/* Intentionally not key type: libckteec will guess the key type */
 	{ CKA_SIGN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_DECRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 static void cktest_keygen_noparams(ADBG_Case_t *c, CK_SLOT_ID slot,

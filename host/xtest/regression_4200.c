@@ -814,7 +814,10 @@ static CK_ATTRIBUTE cktest_generate_ecc_pubkey[] = {
 	{ CKA_ID, &(CK_ULONG){1}, sizeof(CK_ULONG) },
 	{ CKA_EC_PARAMS, NULL, 0 },	/* Will be run at runtime */
 	{ CKA_LABEL, NULL, 0 },		/* Will be run at runtime */
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
+
 static CK_ATTRIBUTE cktest_generate_ecc_privkey[] = {
 	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_PRIVATE_KEY},
 						sizeof(CK_OBJECT_CLASS) },
@@ -824,6 +827,8 @@ static CK_ATTRIBUTE cktest_generate_ecc_privkey[] = {
 	{ CKA_ID, &(CK_ULONG){1}, sizeof(CK_ULONG) },
 	{ CKA_EC_PARAMS, NULL, 0 },	/* Will be run at runtime */
 	{ CKA_LABEL, NULL, 0 },		/* Will be run at runtime */
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 /* Valid template to generate an RSA key pair */
@@ -835,7 +840,10 @@ static CK_ATTRIBUTE cktest_generate_rsa_pubkey[] = {
 	{ CKA_ID, &(CK_ULONG){1}, sizeof(CK_ULONG) },
 	{ CKA_MODULUS_BITS, NULL, 0 },	/* Will be run at runtime */
 	{ CKA_LABEL, NULL, 0 },		/* Will be run at runtime */
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
+
 static CK_ATTRIBUTE cktest_generate_rsa_privkey[] = {
 	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_PRIVATE_KEY},
 						sizeof(CK_OBJECT_CLASS) },
@@ -844,6 +852,8 @@ static CK_ATTRIBUTE cktest_generate_rsa_privkey[] = {
 	{ CKA_DERIVE, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
 	{ CKA_ID, &(CK_ULONG){1}, sizeof(CK_ULONG) },
 	{ CKA_LABEL, NULL, 0 },		/* Will be run at runtime */
+	{ CKA_SUBJECT, NULL, 0 },
+	{ CKA_PUBLIC_KEY_INFO, NULL, 0 },
 };
 
 /*
