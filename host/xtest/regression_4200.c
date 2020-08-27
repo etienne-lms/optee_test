@@ -157,6 +157,10 @@ static CK_RV init_user_test_token(CK_SLOT_ID slot)
 	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
 	CK_RV rv = CKR_GENERAL_ERROR;
 
+	rv = init_test_token(slot);
+	if (rv)
+		return rv;
+
 	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
 	if (rv)
 		return rv;
