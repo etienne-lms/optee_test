@@ -341,7 +341,6 @@ static TEE_Result unpack_attrs(const uint8_t *buf, size_t blen,
 			uintptr_t p;
 
 			a[n].attributeID = ap[n].id;
-#define TEE_ATTR_BIT_VALUE		  (1 << 29)
 			if (ap[n].id & TEE_ATTR_BIT_VALUE) {
 				a[n].content.value.a = ap[n].a;
 				a[n].content.value.b = ap[n].b;
