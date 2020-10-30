@@ -14,16 +14,11 @@ include $(TA_DEV_KIT_DIR)/mk/conf.mk
 # LDFLAGS that are suitable for the client applications, not for TAs
 LDFLAGS=
 
-ifeq ($(CFG_TA_DYNLINK),y)
-OS_TEST_LIB := os_test_lib
-endif
-
-#	   $(OS_TEST_LIB) \
-#	   os_test_lib_dl \
-#	   os_test \
-
 TA_DIRS := create_fail_test \
 	   crypt \
+	   os_test_lib \
+	   os_test_lib_dl \
+	   os_test \
 	   rpc_test \
 	   sims \
 	   miss \

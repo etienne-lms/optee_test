@@ -33,8 +33,12 @@ define cc-bits
 $(if $(filter arm, $(1)),32,$(if $(filter aarch64, $(1)),64,unknown-arch))
 endef
 
-# OpenSSL is used by GP tests series 8500 and Mbed TLS test 8103
-ifneq ($(CFG_GP_PACKAGE_PATH)$(filter y,$(CFG_TA_MBEDTLS)),)
+# OpenSSL is used by:
+# - GP tests series 8500
+# - Mbed TLS test 8103
+# - User/group login tests 1027 and 1028
+WITH_OPENSSL ?= y
+ifeq ($(WITH_OPENSSL),y)
 CFLAGS += -DOPENSSL_FOUND=1
 ifneq ($(OPTEE_OPENSSL_EXPORT),)
 LDFLAGS += -lcrypto
@@ -70,14 +74,14 @@ srcs +=	adbg/src/adbg_case.c \
 	regression_4100.c \
 	regression_5000.c \
 	regression_6000.c \
-	regression_7000.c \
 	regression_8000.c \
 	regression_8100.c \
 	sha_perf.c \
 	stats.c \
 	xtest_helpers.c \
 	xtest_main.c \
-	xtest_test.c
+	xtest_test.c \
+	xtest_uuid_helpers.c
 
 ifeq ($(CFG_SECSTOR_TA_MGMT_PTA),y)
 srcs += install_ta.c
@@ -88,10 +92,14 @@ srcs += sdp_basic.c
 endif
 
 ifeq ($(CFG_PKCS11_TA),y)
+srcs += pkcs11_1000.c
+# regression_4200.c is temporary test material that should move
+# into pkcs11_xxxx.c
 srcs += regression_4200.c
-OPTEE_CKTEEC_HEADERS ?= ../../../optee_client/libckteec/include
+
+OPTEE_PKCS11_TA_HEADERS ?= ../../../optee_client/libckteec/include
 CFLAGS += -DCFG_PKCS11_TA
-CFLAGS += -I$(OPTEE_CKTEEC_HEADERS)
+CFLAGS += -I$(OPTEE_PKCS11_TA_HEADERS)
 LDFLAGS += -L$(OPTEE_CLIENT_EXPORT)/lib -lckteec
 endif
 
@@ -109,7 +117,6 @@ objs 	:= $(patsubst %.c,$(out-dir)/xtest/%.o, $(srcs))
 
 CFLAGS += -I./
 CFLAGS += -I./adbg/include
-CFLAGS += -I./xml/include
 CFLAGS += -I$(out-dir)/xtest
 
 CFLAGS += -I$(OPTEE_CLIENT_EXPORT)/include
@@ -131,6 +138,7 @@ CFLAGS += -I../../ta/sha_perf/include
 CFLAGS += -I../../ta/aes_perf/include
 CFLAGS += -I../../ta/socket/include
 CFLAGS += -I../../ta/sdp_basic/include
+CFLAGS += -I../../ta/tpm_log_test/include
 
 ifdef CFG_GP_PACKAGE_PATH
 CFLAGS += -I../../ta/GP_TTA_Arithmetical

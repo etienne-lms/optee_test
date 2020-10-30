@@ -1,15 +1,7 @@
+/* SPDX-License-Identifier: GPL-2.0 */
 /*
  * Copyright (c) 2016, Linaro Limited
  * Copyright (c) 2014, STMicroelectronics International N.V.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License Version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
  */
 
 #ifndef XTEST_TEST_H
@@ -24,6 +16,9 @@
 ADBG_SUITE_DECLARE(benchmark);
 #ifdef WITH_GP_TESTS
 ADBG_SUITE_DECLARE(gp);
+#endif
+#ifdef CFG_PKCS11_TA
+ADBG_SUITE_DECLARE(pkcs11);
 #endif
 ADBG_SUITE_DECLARE(regression);
 
@@ -137,6 +132,7 @@ extern const TEEC_UUID concurrent_large_ta_uuid;
 extern const TEEC_UUID storage_benchmark_ta_uuid;
 extern const TEEC_UUID socket_ta_uuid;
 extern const TEEC_UUID sdp_basic_ta_uuid;
-extern char *_device;
+extern const TEEC_UUID tpm_log_test_ta_uuid;
+extern char *xtest_tee_name;
 
 #endif /*XTEST_TEST_H*/

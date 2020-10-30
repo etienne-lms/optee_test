@@ -1,14 +1,6 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  * Copyright (c) 2014, STMicroelectronics International N.V.
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License Version 2 as
- * published by the Free Software Foundation.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
  */
 
 #include "xtest_test.h"
@@ -27,15 +19,12 @@
 #include <enc_fs_key_manager_test.h>
 #include <ta_storage_benchmark.h>
 #include <ta_socket.h>
+#include <ta_tpm_log_test.h>
 #include <tee_api_defines.h>
 #include <__tee_isocket_defines.h>
 #include <__tee_tcpsocket_defines.h>
 #include <__tee_udpsocket_defines.h>
 #include <ta_sdp_basic.h>
-#ifdef WITH_GP_TESTS
-#include <tee_api_types.h>
-#include <TTA_DS_protocol.h>
-#endif
 
 ADBG_ENUM_TABLE_DEFINE_BEGIN(TEEC_Result)
 ADBG_ENUM_TABLE_ENTRY(TEEC_SUCCESS),
@@ -206,6 +195,4 @@ const TEEC_UUID concurrent_large_ta_uuid = TA_CONCURRENT_LARGE_UUID;
 const TEEC_UUID storage_benchmark_ta_uuid = TA_STORAGE_BENCHMARK_UUID;
 const TEEC_UUID socket_ta_uuid = TA_SOCKET_UUID;
 const TEEC_UUID sdp_basic_ta_uuid = TA_SDP_BASIC_UUID;
-#ifdef WITH_GP_TESTS
-const TEEC_UUID gp_tta_ds_uuid = TA_TTA_DS_UUID;
-#endif
+const TEEC_UUID tpm_log_test_ta_uuid = TA_TPM_LOG_TEST_UUID;
