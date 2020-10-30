@@ -1547,14 +1547,19 @@ static const struct cktest_allowed_test cktest_allowed_invalid[] = {
 	CKTEST_KEY_MECHA(cktest_aes_not_gcm, &cktest_aes_gcm_mechanism),
 };
 
-/* Create session object and token object from a session */
-static CK_RV cipher_init_final(ADBG_Case_t *c, CK_SESSION_HANDLE session,
-				CK_ATTRIBUTE_PTR attr_key, CK_ULONG attr_count,
-				CK_MECHANISM_PTR mechanism, uint32_t mode,
-				CK_RV expected_rc)
+/*
+ * Test cipher support for a object
+ * Open and close session to wipe possibly pending operation on session
+ */
+static CK_RV cipher_init_final(ADBG_Case_t *c, CK_SLOT_ID slot,
+			       CK_ATTRIBUTE_PTR attr_key,
+			       CK_ULONG attr_count, CK_MECHANISM_PTR mechanism,
+			       uint32_t mode, CK_RV expected_rc)
 {
 	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_OBJECT_HANDLE object = CK_INVALID_HANDLE;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
+	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
 	switch (mode) {
 	case TEE_MODE_ENCRYPT:
@@ -1564,38 +1569,29 @@ static CK_RV cipher_init_final(ADBG_Case_t *c, CK_SESSION_HANDLE session,
 		ADBG_EXPECT_TRUE(c, false);
 	}
 
+	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return rv;
+
 	rv = C_CreateObject(session, attr_key, attr_count, &object);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto bail;
+		goto out_session;
 
 	if (mode == TEE_MODE_ENCRYPT)
 		rv = C_EncryptInit(session, mechanism, object);
 	if (mode == TEE_MODE_DECRYPT)
 		rv = C_DecryptInit(session, mechanism, object);
 
-	if (!ADBG_EXPECT_CK_RESULT(c, expected_rc, rv)) {
+	if (!ADBG_EXPECT_CK_RESULT(c, expected_rc, rv))
 		rv = CKR_GENERAL_ERROR;
-		goto bail;
-	}
-
-	if (rv == CKR_OK) {
-		if (mode == TEE_MODE_ENCRYPT)
-			rv = C_EncryptFinal(session, NULL, NULL);
-		if (mode == TEE_MODE_DECRYPT)
-			rv = C_DecryptFinal(session, NULL, NULL);
-
-		/* Only check that the operation is no more active */
-		if (!ADBG_EXPECT_TRUE(c, rv != CKR_BUFFER_TOO_SMALL)) {
-			rv = CKR_GENERAL_ERROR;
-			goto bail;
-		}
-	}
 
 	rv = C_DestroyObject(session, object);
-	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto bail;
+	ADBG_EXPECT_CK_OK(c, rv);
 
-bail:
+out_session:
+	rv = C_CloseSession(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
 	return rv;
 }
 
@@ -1609,28 +1605,23 @@ static void xtest_tee_test_4208(ADBG_Case_t *c)
 {
 	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SLOT_ID slot = 0;
-	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 	size_t n = 0;
 
 	rv = init_lib_and_find_token_slot(&slot);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		return;
 
-	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
-	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto bail;
 
 	for (n = 0; n < ARRAY_SIZE(cktest_allowed_valid); n++) {
 
 		Do_ADBG_BeginSubCase(c, "valid usage #%zu", n);
 
-		rv = cipher_init_final(c, session,
-					cktest_allowed_valid[n].attr_key,
-					cktest_allowed_valid[n].attr_count,
-					cktest_allowed_valid[n].mechanism,
-					TEE_MODE_ENCRYPT,
-					CKR_OK);
+		rv = cipher_init_final(c, slot,
+				       cktest_allowed_valid[n].attr_key,
+				       cktest_allowed_valid[n].attr_count,
+				       cktest_allowed_valid[n].mechanism,
+				       TEE_MODE_ENCRYPT,
+				       CKR_OK);
 
 		ADBG_EXPECT_CK_OK(c, rv);
 
@@ -1643,12 +1634,12 @@ static void xtest_tee_test_4208(ADBG_Case_t *c)
 	for (n = 0; n < ARRAY_SIZE(cktest_allowed_invalid); n++) {
 		Do_ADBG_BeginSubCase(c, "invalid usage #%zu", n);
 
-		rv = cipher_init_final(c, session,
-					cktest_allowed_invalid[n].attr_key,
-					cktest_allowed_invalid[n].attr_count,
-					cktest_allowed_invalid[n].mechanism,
-					TEE_MODE_ENCRYPT,
-					CKR_KEY_FUNCTION_NOT_PERMITTED);
+		rv = cipher_init_final(c, slot,
+				       cktest_allowed_invalid[n].attr_key,
+				       cktest_allowed_invalid[n].attr_count,
+				       cktest_allowed_invalid[n].mechanism,
+				       TEE_MODE_ENCRYPT,
+				       CKR_KEY_FUNCTION_NOT_PERMITTED);
 
 		ADBG_EXPECT_CK_OK(c, rv);
 
@@ -1659,9 +1650,6 @@ static void xtest_tee_test_4208(ADBG_Case_t *c)
 	}
 
 bail:
-	rv = C_CloseSession(session);
-	ADBG_EXPECT_CK_OK(c, rv);
-
 	rv = close_lib();
 	ADBG_EXPECT_CK_OK(c, rv);
 }
@@ -1670,97 +1658,79 @@ static void xtest_tee_test_4209(ADBG_Case_t *c)
 {
 	CK_RV rv = CKR_GENERAL_ERROR;
 	CK_SLOT_ID slot = 0;
-	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
-	CK_FLAGS session_flags = CKF_SERIAL_SESSION;
 
 	rv = init_lib_and_find_token_slot(&slot);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		return;
 
-	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
-	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto bail;
-
 	/* Encrypt only AES CTS key */
-	rv = cipher_init_final(c, session,
-				cktest_aes_enc_only_cts,
-				ARRAY_SIZE(cktest_aes_enc_only_cts),
-				&cktest_aes_cts_mechanism,
-				TEE_MODE_ENCRYPT,
-				CKR_OK);
+	rv = cipher_init_final(c, slot,
+			       cktest_aes_enc_only_cts,
+			       ARRAY_SIZE(cktest_aes_enc_only_cts),
+			       &cktest_aes_cts_mechanism,
+			       TEE_MODE_ENCRYPT, CKR_OK);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
-	rv = cipher_init_final(c, session,
-				cktest_aes_enc_only_cts,
-				ARRAY_SIZE(cktest_aes_enc_only_cts),
-				&cktest_aes_cts_mechanism,
-				TEE_MODE_DECRYPT,
-				CKR_KEY_FUNCTION_NOT_PERMITTED);
+	rv = cipher_init_final(c, slot,
+			       cktest_aes_enc_only_cts,
+			       ARRAY_SIZE(cktest_aes_enc_only_cts),
+			       &cktest_aes_cts_mechanism,
+			       TEE_MODE_DECRYPT,
+			       CKR_KEY_FUNCTION_NOT_PERMITTED);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
 	/* Decrypt only AES CTR key */
-	rv = cipher_init_final(c, session,
-				cktest_aes_dec_only_ctr,
-				ARRAY_SIZE(cktest_aes_dec_only_ctr),
-				&cktest_aes_ctr_mechanism,
-				TEE_MODE_ENCRYPT,
-				CKR_KEY_FUNCTION_NOT_PERMITTED);
+	rv = cipher_init_final(c, slot, cktest_aes_dec_only_ctr,
+			       ARRAY_SIZE(cktest_aes_dec_only_ctr),
+			       &cktest_aes_ctr_mechanism,
+			       TEE_MODE_ENCRYPT,
+			       CKR_KEY_FUNCTION_NOT_PERMITTED);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
-	rv = cipher_init_final(c, session,
-				cktest_aes_dec_only_ctr,
-				ARRAY_SIZE(cktest_aes_dec_only_ctr),
-				&cktest_aes_ctr_mechanism,
-				TEE_MODE_ENCRYPT,
-				CKR_KEY_FUNCTION_NOT_PERMITTED);
+	rv = cipher_init_final(c, slot, cktest_aes_dec_only_ctr,
+			       ARRAY_SIZE(cktest_aes_dec_only_ctr),
+			       &cktest_aes_ctr_mechanism,
+			       TEE_MODE_ENCRYPT,
+			       CKR_KEY_FUNCTION_NOT_PERMITTED);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
 	/* Encrypt only AES GCM key */
-	rv = cipher_init_final(c, session,
-				cktest_aes_enc_only_gcm,
-				ARRAY_SIZE(cktest_aes_enc_only_gcm),
-				&cktest_aes_gcm_mechanism,
-				TEE_MODE_ENCRYPT,
-				CKR_OK);
+	rv = cipher_init_final(c, slot, cktest_aes_enc_only_gcm,
+			       ARRAY_SIZE(cktest_aes_enc_only_gcm),
+			       &cktest_aes_gcm_mechanism,
+			       TEE_MODE_ENCRYPT, CKR_OK);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
-	rv = cipher_init_final(c, session,
-				cktest_aes_enc_only_gcm,
-				ARRAY_SIZE(cktest_aes_enc_only_gcm),
-				&cktest_aes_gcm_mechanism,
-				TEE_MODE_DECRYPT,
-				CKR_KEY_FUNCTION_NOT_PERMITTED);
+	rv = cipher_init_final(c, slot, cktest_aes_enc_only_gcm,
+			       ARRAY_SIZE(cktest_aes_enc_only_gcm),
+			       &cktest_aes_gcm_mechanism,
+			       TEE_MODE_DECRYPT,
+			       CKR_KEY_FUNCTION_NOT_PERMITTED);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
 	/* Decrypt only AES CCM key */
-	rv = cipher_init_final(c, session,
-				cktest_aes_dec_only_ccm,
-				ARRAY_SIZE(cktest_aes_dec_only_ccm),
-				&cktest_aes_ccm_mechanism,
-				TEE_MODE_DECRYPT,
-				CKR_OK);
+	rv = cipher_init_final(c, slot, cktest_aes_dec_only_ccm,
+			       ARRAY_SIZE(cktest_aes_dec_only_ccm),
+			       &cktest_aes_ccm_mechanism,
+			       TEE_MODE_DECRYPT, CKR_OK);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
-	rv = cipher_init_final(c, session,
-				cktest_aes_dec_only_ccm,
-				ARRAY_SIZE(cktest_aes_dec_only_ccm),
-				&cktest_aes_ccm_mechanism,
-				TEE_MODE_ENCRYPT,
-				CKR_KEY_FUNCTION_NOT_PERMITTED);
+	rv = cipher_init_final(c, slot, cktest_aes_dec_only_ccm,
+			       ARRAY_SIZE(cktest_aes_dec_only_ccm),
+			       &cktest_aes_ccm_mechanism,
+			       TEE_MODE_ENCRYPT,
+			       CKR_KEY_FUNCTION_NOT_PERMITTED);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
 bail:
-	rv = C_CloseSession(session);
-	ADBG_EXPECT_CK_OK(c, rv);
-
 	rv = close_lib();
 	ADBG_EXPECT_CK_OK(c, rv);
 }
