@@ -3,7 +3,6 @@
  * Copyright (c) 2019, Linaro Limited
  */
 
-#include <compiler.h>
 #include <dirent.h>
 #include <err.h>
 #include <errno.h>
@@ -18,6 +17,7 @@
 #include <sys/types.h>
 #include <tee_client_api.h>
 #include <unistd.h>
+#include "xtest_helpers.h"
 #include "xtest_test.h"
 #include "stats.h"
 
@@ -80,7 +80,7 @@ static int close_sess(TEEC_Context *ctx, TEEC_Session *sess)
 	return EXIT_SUCCESS;
 }
 
-static int stat_pager(int argc, char *argv[] __unused)
+static int stat_pager(int argc, char *argv[])
 {
 	TEEC_Context ctx = { };
 	TEEC_Session sess = { };
@@ -88,6 +88,7 @@ static int stat_pager(int argc, char *argv[] __unused)
 	uint32_t eo = 0;
 	TEEC_Operation op = { };
 
+	UNUSED(argv);
 	if (argc != 1)
 		return usage();
 
@@ -113,7 +114,7 @@ static int stat_pager(int argc, char *argv[] __unused)
 	return close_sess(&ctx, &sess);
 }
 
-static int stat_alloc(int argc, char *argv[] __unused)
+static int stat_alloc(int argc, char *argv[])
 {
 	TEEC_Context ctx = { };
 	TEEC_Session sess = { };
@@ -124,6 +125,7 @@ static int stat_alloc(int argc, char *argv[] __unused)
 	size_t stats_size_bytes = 0;
 	size_t n = 0;
 
+	UNUSED(argv);
 	if (argc != 1)
 		return usage();
 
@@ -185,13 +187,14 @@ static int stat_alloc(int argc, char *argv[] __unused)
 	return close_sess(&ctx, &sess);
 }
 
-static int stat_memleak(int argc, char *argv[] __unused)
+static int stat_memleak(int argc, char *argv[])
 {
 	TEEC_Context ctx = { };
 	TEEC_Session sess = { };
 	TEEC_Result res = TEEC_ERROR_GENERIC;
 	uint32_t eo = 0;
 
+	UNUSED(argv);
 	if (argc != 1)
 		return usage();
 
