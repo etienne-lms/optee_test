@@ -954,6 +954,8 @@ static void xtest_tee_test_4205(ADBG_Case_t *c)
 	int subcase = 0;
 	CK_MECHANISM test_mecha;
 	CK_ULONG ck_ul = 0;
+	CK_BYTE data[128] = { 0 };
+	CK_ULONG data_sz = sizeof(data);
 
 	memset(&test_mecha, 0, sizeof(test_mecha));
 
@@ -1056,8 +1058,9 @@ static void xtest_tee_test_4205(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
-	/* Only check that the operation is no more active */
-	rv = C_EncryptFinal(session, NULL, NULL);
+	/* Terminate signing operation and check its nor more active */
+	data_sz = sizeof(data);
+	rv = C_EncryptFinal(session, data, &data_sz);
 	if (!ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=, CKR_BUFFER_TOO_SMALL))
 		goto bail;
 
@@ -1127,18 +1130,20 @@ static void xtest_tee_test_4205(ADBG_Case_t *c)
 
 		rv = C_SignInit(session, &test_mecha, obj_hdl2);
 		if (ADBG_EXPECT_CK_OK(c, rv)) {
-			/* Only check that the operation is no more active */
-			rv = C_SignFinal(session, NULL, NULL);
+			/* Terminate operation and check its nor more active */
+			data_sz = sizeof(data);
+			rv = C_SignFinal(session, data, &data_sz);
 			ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=,
-							CKR_BUFFER_TOO_SMALL);
+						     CKR_BUFFER_TOO_SMALL);
 		}
 
 		rv = C_VerifyInit(session, &test_mecha, obj_hdl);
 		if (ADBG_EXPECT_CK_OK(c, rv)) {
-			/* Only check that the operation is no more active */
-			rv = C_VerifyFinal(session, NULL, 0);
+			/* Terminate signing operation and check its nor more active */
+			data_sz = sizeof(data);
+			rv = C_VerifyFinal(session, data, data_sz);
 			ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=,
-							CKR_BUFFER_TOO_SMALL);
+						     CKR_BUFFER_TOO_SMALL);
 		}
 
 		rv = C_DestroyObject(session, obj_hdl);
@@ -1192,15 +1197,17 @@ static void xtest_tee_test_4205(ADBG_Case_t *c)
 
 	rv = C_SignInit(session, &test_mecha, obj_hdl2);
 	if (ADBG_EXPECT_CK_OK(c, rv)) {
-		/* Only check that the operation is no more active */
-		rv = C_SignFinal(session, NULL, NULL);
+		/* Terminate signing operation and check its nor more active */
+		data_sz = sizeof(data);
+		rv = C_SignFinal(session, data, &data_sz);
 		ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=, CKR_BUFFER_TOO_SMALL);
 	}
 
 	rv = C_VerifyInit(session, &test_mecha, obj_hdl);
 	if (ADBG_EXPECT_CK_OK(c, rv)) {
-		/* Only check that the operation is no more active */
-		rv = C_VerifyFinal(session, NULL, 0);
+		/* Terminate signing operation and check its nor more active */
+		data_sz = sizeof(data);
+		rv = C_VerifyFinal(session, data, data_sz);
 		ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=, CKR_BUFFER_TOO_SMALL);
 	}
 
