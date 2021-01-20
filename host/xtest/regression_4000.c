@@ -2548,11 +2548,13 @@ static void xtest_tee_test_4003(ADBG_Case_t *c)
 {
 	TEEC_Session session = { };
 	TEE_OperationHandle op = TEE_HANDLE_NULL;
+	TEE_OperationHandle op2 = TEE_HANDLE_NULL;
 	TEE_ObjectHandle key1_handle = TEE_HANDLE_NULL;
 	TEE_ObjectHandle key2_handle = TEE_HANDLE_NULL;
 	uint8_t out[2048] = { };
 	size_t out_size = 0;
 	size_t out_offs = 0;
+	size_t out_offs2 = 0;
 	uint32_t ret_orig = 0;
 	size_t n = 0;
 
@@ -2600,6 +2602,12 @@ static void xtest_tee_test_4003(ADBG_Case_t *c)
 
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			ta_crypt_cmd_allocate_operation(c, &session, &op,
+				ciph_cases[n].algo, ciph_cases[n].mode,
+				op_key_size)))
+			goto out;
+
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_allocate_operation(c, &session, &op2,
 				ciph_cases[n].algo, ciph_cases[n].mode,
 				op_key_size)))
 			goto out;
@@ -2673,8 +2681,13 @@ static void xtest_tee_test_4003(ADBG_Case_t *c)
 			ADBG_EXPECT_COMPARE_UNSIGNED(c, out_size, ==,
 				ciph_cases[n].in_incr);
 
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_copy_operation(c, &session, op2, op)))
+			goto out;
+
 		out_offs += out_size;
 		out_size = sizeof(out) - out_offs;
+		out_offs2 = out_offs;
 
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			ta_crypt_cmd_cipher_do_final(c, &session, op,
@@ -2689,8 +2702,28 @@ static void xtest_tee_test_4003(ADBG_Case_t *c)
 		(void)ADBG_EXPECT_BUFFER(c, ciph_cases[n].out,
 					 ciph_cases[n].out_len, out, out_offs);
 
+		/* test on the copied op2 */
+		out_size = sizeof(out) - out_offs2;
+
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_cipher_do_final(c, &session, op2,
+				ciph_cases[n].in + ciph_cases[n].in_incr,
+				ciph_cases[n].in_len - ciph_cases[n].in_incr,
+				out + out_offs2,
+				&out_size)))
+			goto out;
+
+		out_offs2 += out_size;
+
+		ADBG_EXPECT_BUFFER(c, ciph_cases[n].out, ciph_cases[n].out_len,
+				   out, out_offs2);
+
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			ta_crypt_cmd_free_operation(c, &session, op)))
+			goto out;
+
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_free_operation(c, &session, op2)))
 			goto out;
 
 		Do_ADBG_EndSubCase(c, NULL);
@@ -3130,11 +3163,13 @@ static void xtest_tee_test_4005(ADBG_Case_t *c)
 {
 	TEEC_Session session = { };
 	TEE_OperationHandle op = TEE_HANDLE_NULL;
+	TEE_OperationHandle op2 = TEE_HANDLE_NULL;
 	TEE_ObjectHandle key_handle = TEE_HANDLE_NULL;
 	TEE_Attribute key_attr = { };
 	uint8_t out[512] = { };
 	size_t out_size = 0;
 	size_t out_offs = 0;
+	size_t out_offs2 = 0;
 	uint32_t ret_orig = 0;
 	size_t n = 0;
 
@@ -3154,6 +3189,12 @@ static void xtest_tee_test_4005(ADBG_Case_t *c)
 
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			ta_crypt_cmd_allocate_operation(c, &session, &op,
+				ae_cases[n].algo, ae_cases[n].mode,
+				key_attr.content.ref.length * 8)))
+			goto out;
+
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_allocate_operation(c, &session, &op2,
 				ae_cases[n].algo, ae_cases[n].mode,
 				key_attr.content.ref.length * 8)))
 			goto out;
@@ -3232,7 +3273,12 @@ static void xtest_tee_test_4005(ADBG_Case_t *c)
 			}
 		}
 
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_copy_operation(c, &session, op2, op)))
+			goto out;
+
 		out_size = sizeof(out) - out_offs;
+		out_offs2 = out_offs;
 		if (ae_cases[n].mode == TEE_MODE_ENCRYPT) {
 			uint8_t out_tag[64];
 			size_t out_tag_len = MIN(sizeof(out_tag),
@@ -3272,8 +3318,54 @@ static void xtest_tee_test_4005(ADBG_Case_t *c)
 				ae_cases[n].ptx_len, out, out_offs);
 		}
 
+		/* test on the copied op2 */
+		out_size = sizeof(out) - out_offs2;
+		memset(out + out_offs2, 0, out_size);
+		if (ae_cases[n].mode == TEE_MODE_ENCRYPT) {
+			uint8_t out_tag[64] = { 0 };
+			size_t out_tag_len = MIN(sizeof(out_tag),
+						 ae_cases[n].tag_len);
+
+			if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+				ta_crypt_cmd_ae_encrypt_final(c, &session, op2,
+					ae_cases[n].ptx + ae_cases[n].in_incr,
+					ae_cases[n].ptx_len -
+						ae_cases[n].in_incr,
+					out + out_offs2,
+					&out_size, out_tag, &out_tag_len)))
+				goto out;
+
+			ADBG_EXPECT_BUFFER(c, ae_cases[n].tag,
+					   ae_cases[n].tag_len, out_tag,
+					   out_tag_len);
+
+			out_offs2 += out_size;
+
+			(void)ADBG_EXPECT_BUFFER(c, ae_cases[n].ctx,
+				ae_cases[n].ctx_len, out, out_offs2);
+		} else {
+			if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+				ta_crypt_cmd_ae_decrypt_final(c, &session, op2,
+					ae_cases[n].ctx + ae_cases[n].in_incr,
+					ae_cases[n].ctx_len -
+						ae_cases[n].in_incr,
+					out + out_offs2,
+					&out_size, ae_cases[n].tag,
+					ae_cases[n].tag_len)))
+				goto out;
+
+			out_offs2 += out_size;
+
+			(void)ADBG_EXPECT_BUFFER(c, ae_cases[n].ptx,
+				ae_cases[n].ptx_len, out, out_offs2);
+		}
+
 		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
 			ta_crypt_cmd_free_operation(c, &session, op)))
+			goto out;
+
+		if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+			ta_crypt_cmd_free_operation(c, &session, op2)))
 			goto out;
 
 		Do_ADBG_EndSubCase(c, NULL);

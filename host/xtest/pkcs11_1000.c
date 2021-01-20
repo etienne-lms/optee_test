@@ -61,6 +61,12 @@ static CK_MECHANISM cktest_hmac_sha384_mechanism = {
 static CK_MECHANISM cktest_hmac_sha512_mechanism = {
 	CKM_SHA512_HMAC, NULL, 0,
 };
+static CK_MECHANISM cktest_gensecret_keygen_mechanism = {
+	CKM_GENERIC_SECRET_KEY_GEN, NULL, 0,
+};
+static CK_MECHANISM cktest_aes_keygen_mechanism = {
+	CKM_AES_KEY_GEN, NULL, 0,
+};
 
 /*
  * Util to find a slot on which to open a session
@@ -357,7 +363,7 @@ static void xtest_pkcs11_test_1002(ADBG_Case_t *c)
 	session_flags = CKF_RW_SESSION;
 
 	rv = C_OpenSession(slot, session_flags, NULL, 0, &session[0]);
-	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ARGUMENTS_BAD, rv))
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_SESSION_PARALLEL_NOT_SUPPORTED, rv))
 		goto bail;
 
 	session_flags = CKF_SERIAL_SESSION;
@@ -1597,6 +1603,12 @@ static void xtest_pkcs11_test_1008(ADBG_Case_t *c)
 			if (!ADBG_EXPECT_CK_OK(c, rv))
 				goto err_destr_obj;
 
+			/* Pass input buffer of size 0 */
+			rv = C_SignUpdate(session,
+					  (void *)test->in, 0);
+			if (!ADBG_EXPECT_CK_OK(c, rv))
+				goto err_destr_obj;
+
 			rv = C_SignUpdate(session,
 					  (void *)test->in, test->in_len);
 			if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -1746,6 +1758,11 @@ static void xtest_pkcs11_test_1009(ADBG_Case_t *c)
 			if (!ADBG_EXPECT_CK_OK(c, rv))
 				goto err_destr_obj;
 
+			/* Pass input buffer with size 0 - No affect */
+			rv = C_VerifyUpdate(session, (void *)test->in, 0);
+			if (!ADBG_EXPECT_CK_OK(c, rv))
+				goto err_destr_obj;
+
 			rv = C_VerifyUpdate(session, (void *)test->in,
 					    test->in_len);
 			if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -1887,3 +1904,664 @@ err_close_lib:
 }
 ADBG_CASE_DEFINE(pkcs11, 1009, xtest_pkcs11_test_1009,
 		 "PKCS11: Check Compliance of C_Verify - HMAC Algorithms");
+
+/* Bad key type */
+static CK_ATTRIBUTE cktest_generate_gensecret_object_error1[] = {
+	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_SECRET_KEY},
+						sizeof(CK_OBJECT_CLASS) },
+	{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_AES}, sizeof(CK_KEY_TYPE) },
+	{ CKA_VALUE_LEN, &(CK_ULONG){16}, sizeof(CK_ULONG) },
+};
+
+/* Missing VALUE_LEN */
+static CK_ATTRIBUTE cktest_generate_gensecret_object_error2[] = {
+	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_SECRET_KEY},
+						sizeof(CK_OBJECT_CLASS) },
+	{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_GENERIC_SECRET},
+						sizeof(CK_KEY_TYPE) },
+};
+
+/* Bad object class */
+static CK_ATTRIBUTE cktest_generate_gensecret_object_error3[] = {
+	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_DATA}, sizeof(CK_OBJECT_CLASS) },
+	{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_GENERIC_SECRET},
+						sizeof(CK_KEY_TYPE) },
+	{ CKA_VALUE_LEN, &(CK_ULONG){16 * 8}, sizeof(CK_ULONG) },
+};
+
+/* Invalid template with CKA_LOCAL */
+static CK_ATTRIBUTE cktest_generate_gensecret_object_error4[] = {
+	{ CKA_VALUE_LEN, &(CK_ULONG){16 * 8}, sizeof(CK_ULONG) },
+	{ CKA_LOCAL, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+};
+
+/* Valid template to generate a generic secret */
+static CK_ATTRIBUTE cktest_generate_gensecret_object_valid1[] = {
+	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_SECRET_KEY},
+						sizeof(CK_OBJECT_CLASS) },
+	{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_GENERIC_SECRET},
+						sizeof(CK_KEY_TYPE) },
+	{ CKA_SIGN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	{ CKA_VERIFY, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	{ CKA_VALUE_LEN, &(CK_ULONG){16 * 8}, sizeof(CK_ULONG) },
+};
+
+/* Valid template to generate a generic secret with only VALUE_LEN */
+static CK_ATTRIBUTE cktest_generate_gensecret_object_valid2[] = {
+	{ CKA_VALUE_LEN, &(CK_ULONG){16 * 8}, sizeof(CK_ULONG) },
+	{ CKA_SIGN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+};
+
+
+/* Valid template to generate an all AES purpose key */
+static CK_ATTRIBUTE cktest_generate_aes_object[] = {
+	{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_SECRET_KEY},
+						sizeof(CK_OBJECT_CLASS) },
+	{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_AES}, sizeof(CK_KEY_TYPE) },
+	{ CKA_ENCRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	{ CKA_DECRYPT, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	{ CKA_VALUE_LEN, &(CK_ULONG){16}, sizeof(CK_ULONG) },
+};
+
+static void xtest_pkcs11_test_1010(ADBG_Case_t *c)
+{
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
+	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
+	CK_OBJECT_HANDLE key_handle = CK_INVALID_HANDLE;
+	struct mac_test const *test = &cktest_mac_cases[0];
+	uint8_t out[512] = { 0 };
+	CK_ULONG out_len = 512;
+
+	rv = init_lib_and_find_token_slot(&slot);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return;
+
+	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto close_lib;
+
+	/*
+	 * Generate Generic Secret key using invalid templates
+	 */
+	Do_ADBG_BeginSubCase(c, "Generate Secret Key with Invalid Templates");
+
+	/* NULL Template with !null template length */
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism, NULL,
+			   3, &key_handle);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ARGUMENTS_BAD, rv))
+		goto err;
+
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism,
+			   cktest_generate_gensecret_object_error1,
+			   ARRAY_SIZE(cktest_generate_gensecret_object_error1),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_TEMPLATE_INCONSISTENT, rv))
+		goto err;
+
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism,
+			   cktest_generate_gensecret_object_error2,
+			   ARRAY_SIZE(cktest_generate_gensecret_object_error2),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_TEMPLATE_INCOMPLETE, rv))
+		goto err;
+
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism,
+			   cktest_generate_gensecret_object_error3,
+			   ARRAY_SIZE(cktest_generate_gensecret_object_error3),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_TEMPLATE_INCONSISTENT, rv))
+		goto err;
+
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism,
+			   cktest_generate_gensecret_object_error4,
+			   ARRAY_SIZE(cktest_generate_gensecret_object_error4),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_TEMPLATE_INCONSISTENT, rv))
+		goto err;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Generate a Generic Secret object.
+	 * Try to encrypt with, it should fail...
+	 */
+	Do_ADBG_BeginSubCase(c, "Generate Generic Secret Key - Try Encrypting");
+
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism,
+			   cktest_generate_gensecret_object_valid1,
+			   ARRAY_SIZE(cktest_generate_gensecret_object_valid1),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err;
+
+	rv = C_EncryptInit(session, &cktest_aes_cbc_mechanism, key_handle);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_KEY_FUNCTION_NOT_PERMITTED, rv))
+		goto err_destr_obj;
+
+	rv = C_DestroyObject(session, key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Generate a Generic Secret object.
+	 * Try to sign with it, it should pass...
+	 */
+	Do_ADBG_BeginSubCase(c, "Generate Generic Secret Key - Try Signing");
+	rv = C_GenerateKey(session, &cktest_gensecret_keygen_mechanism,
+			   cktest_generate_gensecret_object_valid2,
+			   ARRAY_SIZE(cktest_generate_gensecret_object_valid2),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err;
+
+	rv = C_SignInit(session, test->mechanism, key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err_destr_obj;
+
+	rv = C_Sign(session, (void *)test->in, test->in_len,
+		      (void *)out, &out_len);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err_destr_obj;
+
+	rv = C_DestroyObject(session, key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Generate a 128 bit AES Secret Key.
+	 * Try to encrypt with, it should pass...
+	 */
+	Do_ADBG_BeginSubCase(c, "Generate AES Key - Try Encrypting");
+
+	rv = C_GenerateKey(session, &cktest_aes_keygen_mechanism,
+			   cktest_generate_aes_object,
+			   ARRAY_SIZE(cktest_generate_aes_object),
+			   &key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err;
+
+	rv = C_EncryptInit(session, &cktest_aes_cbc_mechanism, key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err_destr_obj;
+
+	rv = C_EncryptFinal(session, NULL, NULL);
+	/* Only check that the operation is no more active */
+	if (!ADBG_EXPECT_TRUE(c, rv != CKR_BUFFER_TOO_SMALL))
+		goto err;
+
+	rv = C_DestroyObject(session, key_handle);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto err;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	goto out;
+
+err_destr_obj:
+	ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, key_handle));
+err:
+	Do_ADBG_EndSubCase(c, NULL);
+out:
+	ADBG_EXPECT_CK_OK(c, C_CloseSession(session));
+close_lib:
+	ADBG_EXPECT_CK_OK(c, close_lib());
+}
+ADBG_CASE_DEFINE(pkcs11, 1010, xtest_pkcs11_test_1010,
+		 "PKCS11: Key Generation");
+
+static CK_RV create_data_object(CK_SESSION_HANDLE session,
+				CK_OBJECT_HANDLE *obj_handle,
+				CK_BBOOL token, CK_BBOOL private,
+				const char *label)
+{
+	CK_OBJECT_CLASS class = CKO_DATA;
+	CK_ATTRIBUTE object_template[] = {
+		{ CKA_CLASS, &class, sizeof(CK_OBJECT_CLASS) },
+		{ CKA_TOKEN, &token, sizeof(CK_BBOOL) },
+		{ CKA_PRIVATE, &private, sizeof(CK_BBOOL) },
+		{ CKA_LABEL, (CK_UTF8CHAR_PTR)label, strlen(label) },
+	};
+
+	return C_CreateObject(session, object_template,
+			      ARRAY_SIZE(object_template), obj_handle);
+}
+
+static CK_RV test_find_objects(ADBG_Case_t *c, CK_SESSION_HANDLE session,
+			       CK_ATTRIBUTE_PTR find_template,
+			       CK_ULONG attr_count,
+			       CK_OBJECT_HANDLE_PTR obj_found,
+			       CK_ULONG obj_count,
+			       CK_ULONG expected_cnt)
+{
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_ULONG hdl_count = 0;
+
+	rv = C_FindObjectsInit(session, find_template, attr_count);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return rv;
+
+	rv = C_FindObjects(session, obj_found, obj_count, &hdl_count);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return rv;
+	if (!ADBG_EXPECT_COMPARE_UNSIGNED(c, hdl_count, ==, expected_cnt))
+		return CKR_GENERAL_ERROR;
+
+	rv = C_FindObjectsFinal(session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return rv;
+
+	return rv;
+}
+
+static void destroy_persistent_objects(ADBG_Case_t *c, CK_SLOT_ID slot)
+{
+	uint32_t rv = CKR_GENERAL_ERROR;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
+	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
+	CK_OBJECT_HANDLE obj_hdl = CK_INVALID_HANDLE;
+	CK_ULONG count = 1;
+	CK_ATTRIBUTE cktest_find_all_token_objs[] = {
+		{ CKA_TOKEN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	};
+
+	rv = init_user_test_token(slot);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return;
+
+	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return;
+
+	/* Login to destroy private objects */
+	rv = C_Login(session, CKU_USER, test_token_user_pin,
+		     sizeof(test_token_user_pin));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto bail;
+
+	rv = C_FindObjectsInit(session, cktest_find_all_token_objs,
+			       ARRAY_SIZE(cktest_find_all_token_objs));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto bail;
+
+	while (1) {
+		rv = C_FindObjects(session, &obj_hdl, 1, &count);
+		if (!ADBG_EXPECT_CK_OK(c, rv))
+			goto bail;
+		if (!count)
+			break;
+
+		rv = C_DestroyObject(session, obj_hdl);
+		ADBG_EXPECT_CK_OK(c, rv);
+	}
+
+	rv = C_FindObjectsFinal(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
+	rv = C_Logout(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
+bail:
+	rv = C_CloseSession(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+}
+
+static void xtest_pkcs11_test_1011(ADBG_Case_t *c)
+{
+	CK_RV rv = CKR_GENERAL_ERROR;
+	CK_SLOT_ID slot = 0;
+	CK_SESSION_HANDLE session = CK_INVALID_HANDLE;
+	CK_FLAGS session_flags = CKF_SERIAL_SESSION | CKF_RW_SESSION;
+	CK_OBJECT_HANDLE obj_hdl[10] = { };
+	CK_OBJECT_HANDLE obj_found[10] = { };
+	const char *label = "Common Label";
+	CK_ULONG hdl_count = 0;
+	size_t n = 0;
+	uint32_t i = 0;
+	uint32_t object_id = 0;
+	bool logged_in = false;
+	CK_ATTRIBUTE find_template[] = {
+		{ CKA_LABEL, (CK_UTF8CHAR_PTR)label, strlen(label) },
+	};
+	CK_ATTRIBUTE find_token_template[] = {
+		{ CKA_LABEL, (CK_UTF8CHAR_PTR)label, strlen(label) },
+		{ CKA_TOKEN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+	};
+	CK_ATTRIBUTE find_session_template[] = {
+		{ CKA_LABEL, (CK_UTF8CHAR_PTR)label, strlen(label) },
+		{ CKA_TOKEN, &(CK_BBOOL){CK_FALSE}, sizeof(CK_BBOOL) },
+	};
+	CK_BBOOL bToken = CK_FALSE;
+	CK_ATTRIBUTE get_attr_template[] = {
+		{ CKA_TOKEN, &bToken, sizeof(bToken) },
+	};
+
+	for (n = 0; n < ARRAY_SIZE(obj_hdl); n++)
+		obj_hdl[n] = CK_INVALID_HANDLE;
+	for (n = 0; n < ARRAY_SIZE(obj_found); n++)
+		obj_found[n] = CK_INVALID_HANDLE;
+
+	rv = init_lib_and_find_token_slot(&slot);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return;
+
+	rv = init_test_token(slot);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return;
+
+	rv = init_user_test_token(slot);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		return;
+
+	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto close_lib;
+
+	/*
+	 * Sub test: Create Session Public/Private,
+	 * Token Public/Private objects and find them
+	 */
+	Do_ADBG_BeginSubCase(c, "Find created Data objects when logged in");
+
+	/* Session Public Obj CKA_TOKEN = CK_FALSE, CKA_PRIVATE = CK_FALSE */
+	rv = create_data_object(session, &obj_hdl[object_id++], CK_FALSE,
+				CK_FALSE, label);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	/* Token Public Obj CKA_TOKEN = CK_TRUE, CKA_PRIVATE = CK_FALSE */
+	rv = create_data_object(session, &obj_hdl[object_id++], CK_TRUE,
+				CK_FALSE, label);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	/*
+	 * Token Private Obj CKA_TOKEN = CK_TRUE, CKA_PRIVATE = CK_TRUE
+	 * Expected error as User not logged in
+	 */
+	rv = create_data_object(session, &obj_hdl[object_id], CK_TRUE,
+				CK_TRUE, label);
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_USER_NOT_LOGGED_IN, rv))
+		goto out;
+
+	/* Login to Test Token */
+	rv = C_Login(session, CKU_USER,	test_token_user_pin,
+		     sizeof(test_token_user_pin));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	logged_in = true;
+
+	/* Token Private Obj CKA_TOKEN = CK_TRUE, CKA_PRIVATE = CK_TRUE */
+	rv = create_data_object(session, &obj_hdl[object_id++], CK_TRUE,
+				CK_TRUE, label);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	/* Session Private Obj CKA_TOKEN = CK_FALSE, CKA_PRIVATE = CK_TRUE */
+	rv = create_data_object(session, &obj_hdl[object_id++], CK_FALSE,
+				CK_TRUE, label);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	rv = test_find_objects(c, session, find_template,
+			       ARRAY_SIZE(find_template),
+			       obj_found, ARRAY_SIZE(obj_found), 4);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	/*
+	 * Check if object handles returned when creating objects with this
+	 * session are still valid
+	 */
+	for (i = 0; i < object_id; i++) {
+		rv = C_GetAttributeValue(session, obj_hdl[i], get_attr_template,
+					 ARRAY_SIZE(get_attr_template));
+		if (!ADBG_EXPECT_CK_OK(c, rv))
+			goto out;
+	}
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: Pass NULL template with count as 0. All objects should
+	 * get returned
+	 */
+	Do_ADBG_BeginSubCase(c, "Find all objects by passing NULL template");
+
+	rv = test_find_objects(c, session, NULL, 0, obj_found,
+			       ARRAY_SIZE(obj_found), 4);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: finalize search without getting the handles found
+	 */
+	Do_ADBG_BeginSubCase(c, "Initiate and finalize straight a search");
+
+	rv = C_FindObjectsInit(session, find_template,
+			       ARRAY_SIZE(find_template));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	rv = C_FindObjectsFinal(session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	/*
+	 * Check if object handles returned when creating objects with this
+	 * session are still valid
+	 */
+	for (i = 0; i < object_id; i++) {
+		rv = C_GetAttributeValue(session, obj_hdl[i], get_attr_template,
+					 ARRAY_SIZE(get_attr_template));
+		if (!ADBG_EXPECT_CK_OK(c, rv))
+			goto out;
+	}
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: Logout and find objects. We will find only public
+	 * objects (2)
+	 */
+	Do_ADBG_BeginSubCase(c, "Find created Data objects when logged out");
+
+	rv = C_Logout(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
+	logged_in = false;
+
+	rv = test_find_objects(c, session, find_template,
+			       ARRAY_SIZE(find_template),
+			       obj_found, ARRAY_SIZE(obj_found), 2);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test
+	 */
+	Do_ADBG_BeginSubCase(c, "Find objects 1 by 1 and match handles");
+
+	for (n = 0; n < ARRAY_SIZE(obj_found); n++)
+		obj_found[n] = CK_INVALID_HANDLE;
+
+	rv = C_FindObjectsInit(session, find_template,
+			       ARRAY_SIZE(find_template));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	rv = C_FindObjects(session, obj_found, 1, &hdl_count);
+	if (!ADBG_EXPECT_CK_OK(c, rv) ||
+	    !ADBG_EXPECT_COMPARE_UNSIGNED(c, hdl_count, ==, 1) ||
+	    !ADBG_EXPECT_TRUE(c, (obj_found[0] == obj_hdl[0]) ||
+				 (obj_found[0] == obj_hdl[1])))
+		goto out;
+
+	rv = C_FindObjects(session, &obj_found[1], 1, &hdl_count);
+	if (!ADBG_EXPECT_CK_OK(c, rv) ||
+	    !ADBG_EXPECT_COMPARE_UNSIGNED(c, hdl_count, ==, 1) ||
+	    !ADBG_EXPECT_TRUE(c, (obj_found[1] == obj_hdl[0]) ||
+				 (obj_found[1] == obj_hdl[1])) ||
+	    !ADBG_EXPECT_TRUE(c, (obj_found[1] != obj_found[0])))
+		goto out;
+
+	rv = C_FindObjects(session, obj_found, 1, &hdl_count);
+	if (!ADBG_EXPECT_CK_OK(c, rv) ||
+	    !ADBG_EXPECT_COMPARE_UNSIGNED(c, hdl_count, ==, 0))
+		goto out;
+
+	rv = C_FindObjectsFinal(session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: Find objects with CKA_TOKEN=TRUE
+	 */
+	Do_ADBG_BeginSubCase(c, "Find persistent objects");
+
+	rv = test_find_objects(c, session, find_token_template,
+			       ARRAY_SIZE(find_token_template),
+			       obj_found, ARRAY_SIZE(obj_found), 1);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: Find only session objects
+	 */
+	Do_ADBG_BeginSubCase(c, "Find session objects");
+
+	rv = test_find_objects(c, session, find_session_template,
+			       ARRAY_SIZE(find_session_template),
+			       obj_found, ARRAY_SIZE(obj_found), 1);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test:
+	 */
+	Do_ADBG_BeginSubCase(c, "Login again and find Data objects");
+
+	/* Login to Test Token */
+	rv = C_Login(session, CKU_USER,	test_token_user_pin,
+		     sizeof(test_token_user_pin));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	logged_in = true;
+
+	rv = test_find_objects(c, session, find_template,
+			       ARRAY_SIZE(find_template),
+			       obj_found, ARRAY_SIZE(obj_found), 3);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	rv = C_Logout(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
+	logged_in = false;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: Close session and open new session, find objects
+	 * without logging and after logging
+	 */
+	Do_ADBG_BeginSubCase(c, "Find objects from brand new session");
+
+	rv = C_CloseSession(session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto destr_obj;
+
+	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto destr_obj;
+
+	rv = test_find_objects(c, session, find_template,
+			       ARRAY_SIZE(find_template),
+			       obj_found, ARRAY_SIZE(obj_found), 1);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	/* Login to Test Token */
+	rv = C_Login(session, CKU_USER,	test_token_user_pin,
+		     sizeof(test_token_user_pin));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	logged_in = true;
+
+	rv = test_find_objects(c, session, find_template,
+			       ARRAY_SIZE(find_template),
+			       obj_found, ARRAY_SIZE(obj_found), 2);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	rv = C_Logout(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
+	logged_in = false;
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Sub test: invalid call cases
+	 */
+	Do_ADBG_BeginSubCase(c, "Invalid cases");
+
+	rv = C_FindObjectsFinal(session);
+	ADBG_EXPECT_CK_RESULT(c, CKR_OPERATION_NOT_INITIALIZED, rv);
+
+	rv = C_FindObjects(session,
+			   obj_found, ARRAY_SIZE(obj_found), &hdl_count);
+	ADBG_EXPECT_CK_RESULT(c, CKR_OPERATION_NOT_INITIALIZED, rv);
+
+	rv = C_FindObjectsInit(session, find_template,
+			       ARRAY_SIZE(find_template));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out;
+
+	rv = C_FindObjectsInit(session, find_template,
+			       ARRAY_SIZE(find_template));
+	ADBG_EXPECT_COMPARE_UNSIGNED(c, rv, !=, CKR_OK);
+
+	rv = C_FindObjectsFinal(session);
+	ADBG_EXPECT_CK_OK(c, rv);
+
+	rv = C_FindObjectsInit(session, find_template,
+			       ARRAY_SIZE(find_template));
+	ADBG_EXPECT_CK_OK(c, rv);
+
+	/*
+	 * Intentionally do not finalize the active object search. It should be
+	 * released together with the session closure.
+	 */
+	Do_ADBG_EndSubCase(c, NULL);
+
+out:
+	if (logged_in)
+		ADBG_EXPECT_CK_OK(c, C_Logout(session));
+
+	ADBG_EXPECT_CK_OK(c, C_CloseSession(session));
+
+destr_obj:
+	destroy_persistent_objects(c, slot);
+close_lib:
+	ADBG_EXPECT_CK_OK(c, close_lib());
+}
+ADBG_CASE_DEFINE(pkcs11, 1011, xtest_pkcs11_test_1011,
+		 "PKCS11: Test Find Objects");

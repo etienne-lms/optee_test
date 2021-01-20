@@ -2330,6 +2330,11 @@ static void xtest_tee_test_4215(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail0;
 
+	/* Must login to create private objects */
+	rv = login_user_test_token(session);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto bail;
+
 	rv = C_CreateObject(session, cktest_object_aes_sensitive,
 			    ARRAY_SIZE(cktest_object_aes_sensitive),
 			    &obj_hdl[4]);
@@ -2345,6 +2350,10 @@ static void xtest_tee_test_4215(ADBG_Case_t *c)
 	rv = C_CreateObject(session, cktest_object_pers_aes_enc,
 			    ARRAY_SIZE(cktest_object_pers_aes_enc),
 			    &obj_hdl[1]);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto bail;
+
+	rv = logout_test_token(session);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto bail;
 
