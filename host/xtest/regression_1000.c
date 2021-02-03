@@ -2345,3 +2345,37 @@ static void xtest_tee_test_1032(ADBG_Case_t *c)
 }
 ADBG_CASE_DEFINE(regression, 1032, xtest_tee_test_1032,
 		"Register read-only shared memory");
+
+static void xtest_tee_test_1033(ADBG_Case_t *c)
+{
+	TEEC_Session session = { };
+	uint32_t ret_orig = 0;
+	TEEC_Operation op = TEEC_OPERATION_INITIALIZER;
+	uint8_t buf[32] = { 0xA7 };
+
+	if (!ADBG_EXPECT_TEEC_SUCCESS(c,
+		xtest_teec_open_session(&session, &os_test_ta_uuid, NULL,
+					&ret_orig)))
+		return;
+
+	memset(&op, 0, sizeof(op));
+	op.params[0].tmpref.buffer = buf;
+	op.params[0].tmpref.size = sizeof(buf);
+	op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE,
+					 TEEC_NONE, TEEC_NONE);
+
+	ADBG_EXPECT_TEEC_SUCCESS(c,
+		TEEC_InvokeCommand(&session, TA_OS_TEST_CMD_OLD_PARAM_MEMREF,
+				   &op, &ret_orig));
+
+	memset(&op, 0, sizeof(op));
+
+	ADBG_EXPECT_TEEC_RESULT(c,
+		TEEC_ERROR_TARGET_DEAD,
+		TEEC_InvokeCommand(&session, TA_OS_TEST_CMD_OLD_PARAM_MEMREF,
+				   &op, &ret_orig));
+
+	TEEC_CloseSession(&session);
+}
+ADBG_CASE_DEFINE(regression, 1033, xtest_tee_test_1033,
+		"Test TA access to a memref from a previous invocation");

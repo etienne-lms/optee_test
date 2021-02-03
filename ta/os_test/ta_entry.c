@@ -144,6 +144,8 @@ TEE_Result TA_InvokeCommandEntryPoint(void *pSessionContext,
 	case TA_OS_TEST_CMD_CXX_EXC_MIXED:
 		return TEE_ERROR_NOT_SUPPORTED;
 #endif
+	case TA_OS_TEST_CMD_OLD_PARAM_MEMREF:
+		return ta_entry_memref_from_old_param(nParamTypes, pParams);
 
 	default:
 		return TEE_ERROR_BAD_PARAMETERS;

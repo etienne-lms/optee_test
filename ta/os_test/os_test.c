@@ -1446,3 +1446,55 @@ TEE_Result ta_entry_dl_phdr_dl(void)
 
 	return res;
 }
+
+TEE_Result ta_entry_memref_from_old_param(uint32_t param_types,
+					  TEE_Param params[4])
+{
+	TEE_Result res = TEE_ERROR_GENERIC;
+	/* Save memref parameter to reuse it in a later invocation */
+	static uint8_t *saved_memref0_buffer = NULL;
+	static size_t saved_memref0_size = 0;
+
+	switch (param_types) {
+	case TEE_PARAM_TYPES(TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE,
+			     TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE):
+
+		/* Test access only once a memory reference is saved */
+		if (!saved_memref0_buffer)
+			return TEE_SUCCESS;
+
+		res = TEE_CheckMemoryAccessRights(TEE_MEMORY_ACCESS_READ,
+						  saved_memref0_buffer,
+						  saved_memref0_size);
+		if (!res)
+			return TEE_ERROR_GENERIC;
+
+		res = TEE_CheckMemoryAccessRights(TEE_MEMORY_ACCESS_READ |
+						  TEE_MEMORY_ACCESS_ANY_OWNER,
+						  saved_memref0_buffer,
+						  saved_memref0_size);
+		if (!res)
+			return TEE_ERROR_GENERIC;
+
+		EMSG("Reading buffer gives: %#"PRIx8, *saved_memref0_buffer);
+
+		if (!*saved_memref0_buffer)
+			return TEE_ERROR_GENERIC;
+
+		return TEE_ERROR_SECURITY;
+
+	case TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_OUTPUT, TEE_PARAM_TYPE_NONE,
+			     TEE_PARAM_TYPE_NONE, TEE_PARAM_TYPE_NONE):
+		/* Save memory reference, expect not empty to test access */
+		if (!params[0].memref.size)
+			return TEE_ERROR_BAD_PARAMETERS;
+
+		saved_memref0_buffer = params[0].memref.buffer;
+		saved_memref0_size = params[0].memref.size;
+
+		return TEE_SUCCESS;
+
+	default:
+		return TEE_ERROR_GENERIC;
+	}
+}
