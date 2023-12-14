@@ -8939,7 +8939,10 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	CK_ATTRIBUTE kcv_attr_template[] = {
 		{ CKA_CHECK_VALUE, &kcv, sizeof(kcv) },
 	};
-	CK_ATTRIBUTE cp_attr_template_cka[] = {
+	CK_ATTRIBUTE template_kcv_no_value[] = {
+		{ CKA_CHECK_VALUE, &kcv, 0 },
+	};
+	CK_ATTRIBUTE template_kcv_invalid[] = {
 		{ CKA_CHECK_VALUE, &import_aes128_kcv_invalid,
 		  sizeof(import_aes128_kcv_invalid) },
 	};
@@ -8977,8 +8980,14 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 
 	rv = C_OpenSession(slot, session_flags, NULL, 0, &session);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto close_lib;
+		goto out_lib;
 
+	/*
+	 * Generate a key and get key check value attribute.
+	 * If none is found, the feature is not supported: skip tests.
+	 * If found, check it matches the expected value, computed from
+	 * secrete key value.
+	 */
 	Do_ADBG_BeginSubCase(c, "Compute KCV on C_GenerateKey()");
 
 	rv = C_GenerateKey(session, &cktest_aes_keygen_mechanism,
@@ -8986,16 +8995,22 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 			   ARRAY_SIZE(cktest_generate_aes_object),
 			   &key_handle);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err;
+		goto out_subcase;
 
 	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
+
+	if (rv == CKR_ATTRIBUTE_TYPE_INVALID) {
+		Do_ADBG_Log("Skip check value attribute tests: not supported");
+		goto out_destr_obj;
+	}
+
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto out;
+		goto out_destr_obj;
 
 	rv = C_EncryptInit(session, &cktest_aes_ecb_mechanism, key_handle);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	memset(ciphertext, 0, sizeof(ciphertext));
 	memset(plaintext, 0, sizeof(plaintext));
@@ -9008,34 +9023,94 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv) ||
 	    !ADBG_EXPECT_BUFFER(c, ciphertext, sizeof(kcv),
 				kcv, sizeof(kcv)))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	rv = C_DestroyObject(session, key_handle);
+	key_handle = CK_INVALID_HANDLE;
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err;
+		goto out_destr_obj;
 
 	Do_ADBG_EndSubCase(c, NULL);
 
+	/*
+	 * Import an object which a wellformed precomputed KCV value
+	 */
 	Do_ADBG_BeginSubCase(c, "Set KCV on C_CreateObject()");
 
 	rv = C_CreateObject(session, import_aes_key_template,
 			    ARRAY_SIZE(import_aes_key_template), &key_handle);
 
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
+
+	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+	if (ADBG_EXPECT_CK_OK(c, rv))
+	    ADBG_EXPECT_BUFFER(c, import_aes128_kcv_valid,
+			       sizeof(import_aes128_kcv_valid),
+			       kcv, sizeof(kcv));
 
 	Do_ADBG_EndSubCase(c, NULL);
 
-	Do_ADBG_BeginSubCase(c, "Compute KCV on C_CopyObject()");
+	/*
+	 * Copy wellformed AES key object with its KCV value which
+	 * should still match.
+	 */
+	Do_ADBG_BeginSubCase(c, "Copy and recompute KCV on C_CopyObject()");
 
-	rv = C_CopyObject(session, key_handle, cp_attr_template_cka,
-			  ARRAY_SIZE(cp_attr_template_cka), &key_handle_cp);
+	rv = C_CopyObject(session, key_handle, NULL, 0, &key_handle_cp);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
+
+	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+	if (ADBG_EXPECT_CK_OK(c, rv))
+	    ADBG_EXPECT_BUFFER(c, import_aes128_kcv_valid,
+			       sizeof(import_aes128_kcv_valid),
+			       kcv, sizeof(kcv));
+
+	ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, key_handle_cp));
+	key_handle_cp = CK_INVALID_HANDLE;
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Copy wellformed AES key object replacing its KCV value with
+	 * a no-value value.
+	 */
+	Do_ADBG_BeginSubCase(c, "Set no-value KCV on C_CopyObject()");
+
+	rv = C_CopyObject(session, key_handle, template_kcv_no_value,
+			  ARRAY_SIZE(template_kcv_no_value), &key_handle_cp);
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
+
+	rv = C_GetAttributeValue(session, key_handle_cp, kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+	if (ADBG_EXPECT_CK_OK(c, rv))
+		ADBG_EXPECT_COMPARE_UNSIGNED(c, kcv_attr_template[0].ulValueLen,
+					     ==, 0);
+
+	ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, key_handle_cp));
+	key_handle_cp = CK_INVALID_HANDLE;
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Copy wellformed AES key object replacing its KCV value with
+	 * an invalid value.
+	 */
+	Do_ADBG_BeginSubCase(c, "Set invalid KCV on C_CopyObject()");
+
+	rv = C_CopyObject(session, key_handle, template_kcv_invalid,
+			  ARRAY_SIZE(template_kcv_invalid), &key_handle_cp);
 
 	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	Do_ADBG_EndSubCase(c, NULL);
 
+	/*
+	 * Derive the key and check its KCV is degerated
+	 */
 	Do_ADBG_BeginSubCase(c, "Compute KCV on C_DeriveKey()");
 
 	key_derv_param.pData = derive_buf;
@@ -9050,20 +9125,23 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 			 &derived_key_handle);
 
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	memset(&kcv, 0, sizeof(kcv));
 	rv = C_GetAttributeValue(session, derived_key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	if (!ADBG_EXPECT_COMPARE_UNSIGNED(c,
 		kcv_attr_template[0].ulValueLen, ==, 0))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	Do_ADBG_EndSubCase(c, NULL);
 
+	/*
+	 * Warp and unwrap and AES key, check its KCV value is generated.
+	 */
 	Do_ADBG_BeginSubCase(c, "Compute KCV on C_UnwrapKey()");
 
 	size = sizeof(buf);
@@ -9072,46 +9150,113 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 		       derived_key_handle, buf, &size);
 	if (!ADBG_EXPECT_CK_OK(c, rv) ||
 	    !ADBG_EXPECT_COMPARE_UNSIGNED(c, size, <=, sizeof(buf)))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	rv = C_UnwrapKey(session, &cktest_aes_ecb_mechanism, key_handle, buf,
 			 size, unwrap_template, ARRAY_SIZE(unwrap_template),
 			 &unwrapped_key_handle);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
+
+	/* Save KCV for later use */
+	kcv_attr_template[0].pValue = &ciphertext;
+	kcv_attr_template[0].ulValueLen = sizeof(ciphertext);
+	rv = C_GetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
 
 	Do_ADBG_EndSubCase(c, NULL);
 
+	/*
+	 * Replace KCV value with no-value: should succeed
+	 */
 	Do_ADBG_BeginSubCase(c, "Destroy KCV using C_SetAttributeValue()");
 
-	kcv_attr_template[0].pValue = NULL;
-	kcv_attr_template[0].ulValueLen = 0;
+	rv = C_SetAttributeValue(session, unwrapped_key_handle,
+				 template_kcv_no_value,
+				 ARRAY_SIZE(template_kcv_no_value));
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
+
+	kcv_attr_template[0].pValue = &kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
+	rv = C_GetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
+	ADBG_EXPECT_COMPARE_UNSIGNED(c, kcv_attr_template[0].ulValueLen, ==, 0);
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Replace KCV value with an invalid value: should fail
+	 */
+	Do_ADBG_BeginSubCase(c, "Create an invalid KCV using C_SetAttributeValue()");
+
+	kcv_attr_template[0].pValue = &kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
+	rv = C_GetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+
+
+	rv = C_SetAttributeValue(session, unwrapped_key_handle,
+				 template_kcv_invalid,
+				 ARRAY_SIZE(template_kcv_invalid));
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
+		goto out_destr_obj;
+
+	kcv_attr_template[0].pValue = &kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
+	rv = C_GetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
+	ADBG_EXPECT_COMPARE_UNSIGNED(c, kcv_attr_template[0].ulValueLen, ==, 0);
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Replace KCV value no-value with valid value: should succeed
+	 */
+	Do_ADBG_BeginSubCase(c, "Set the valid KCV using C_SetAttributeValue()");
+
+	kcv_attr_template[0].pValue = &ciphertext;
+	kcv_attr_template[0].ulValueLen = sizeof(ciphertext);
 
 	rv = C_SetAttributeValue(session, unwrapped_key_handle,
 				 kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
+		goto out_destr_obj;
 
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
-
-	rv = C_GetAttributeValue(session, unwrapped_key_handle, kcv_attr_template,
+	rv = C_GetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
+	if (ADBG_EXPECT_CK_OK(c, rv))
+	    ADBG_EXPECT_BUFFER(c, ciphertext, sizeof(kcv), kcv, sizeof(kcv));
 
-	if (!ADBG_EXPECT_CK_OK(c, rv))
-		goto err_destr_obj;
-	ADBG_EXPECT_COMPARE_UNSIGNED(c, kcv_attr_template[0].ulValueLen, ==, 0);
-
-err_destr_obj:
-	ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, unwrapped_key_handle));
-	ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, derived_key_handle));
-	ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, key_handle));
-err:
+out_destr_obj:
+	if (key_handle != CK_INVALID_HANDLE)
+		ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, key_handle));
+	if (key_handle_cp != CK_INVALID_HANDLE)
+		ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, key_handle_cp));
+	if (unwrapped_key_handle != CK_INVALID_HANDLE)
+		ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, unwrapped_key_handle));
+	if (derived_key_handle != CK_INVALID_HANDLE)
+		ADBG_EXPECT_CK_OK(c, C_DestroyObject(session, derived_key_handle));
+out_subcase:
 	Do_ADBG_EndSubCase(c, NULL);
-out:
 	ADBG_EXPECT_CK_OK(c, C_CloseSession(session));
-close_lib:
+out_lib:
 	ADBG_EXPECT_CK_OK(c, close_lib());
 }
 ADBG_CASE_DEFINE(pkcs11, 1029, xtest_pkcs11_test_1029,
