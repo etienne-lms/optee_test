@@ -9210,6 +9210,46 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
 		goto out_destr_obj;
 
+	/* Check object's KCV is still no-value */
+	kcv_attr_template[0].pValue = &kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
+	rv = C_GetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+
+	if (!ADBG_EXPECT_CK_OK(c, rv))
+		goto out_destr_obj;
+	ADBG_EXPECT_COMPARE_UNSIGNED(c, kcv_attr_template[0].ulValueLen, ==, 0);
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Replace KCV value no-value with valid value but wrong size: should
+	 * fail
+	 */
+	Do_ADBG_BeginSubCase(c, "Set KCV of invalid size using C_SetAttributeValue()");
+
+	/* Valid value but bigger value size */
+	kcv_attr_template[0].pValue = &ciphertext;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv) + 1;
+
+	rv = C_SetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
+		goto out_destr_obj;
+
+	/* Valid value but lower value size */
+	kcv_attr_template[0].pValue = &ciphertext;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv) - 1;
+
+	rv = C_SetAttributeValue(session, unwrapped_key_handle,
+				 kcv_attr_template,
+				 ARRAY_SIZE(kcv_attr_template));
+	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
+		goto out_destr_obj;
+
+	/* Check object's KCV is still no-value */
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
@@ -9225,10 +9265,10 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	/*
 	 * Replace KCV value no-value with valid value: should succeed
 	 */
-	Do_ADBG_BeginSubCase(c, "Set the valid KCV using C_SetAttributeValue()");
+	Do_ADBG_BeginSubCase(c, "Set valid KCV using C_SetAttributeValue()");
 
 	kcv_attr_template[0].pValue = &ciphertext;
-	kcv_attr_template[0].ulValueLen = sizeof(ciphertext);
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 
 	rv = C_SetAttributeValue(session, unwrapped_key_handle,
 				 kcv_attr_template,
@@ -9236,6 +9276,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
 
+	/* Check KCV is the expected one */
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
