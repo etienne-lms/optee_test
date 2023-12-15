@@ -8936,6 +8936,39 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 		{ CKA_CHECK_VALUE, &import_aes128_kcv_valid,
 		  sizeof(import_aes128_kcv_valid) },
 	};
+	CK_ATTRIBUTE import_aes_key_template_novalue[] = {
+		{ CKA_TOKEN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_PRIVATE, &(CK_BBOOL){ CK_FALSE }, sizeof(CK_BBOOL) },
+		{ CKA_SENSITIVE, &(CK_BBOOL){ CK_FALSE }, sizeof(CK_BBOOL) },
+		{ CKA_EXTRACTABLE, &(CK_BBOOL){ CK_TRUE }, sizeof(CK_BBOOL) },
+		{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_SECRET_KEY},
+		  sizeof(CK_OBJECT_CLASS) },
+		{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_AES}, sizeof(CK_KEY_TYPE) },
+		{ CKA_ENCRYPT, &(CK_BBOOL){CK_FALSE}, sizeof(CK_BBOOL) },
+		{ CKA_DECRYPT, &(CK_BBOOL){CK_FALSE}, sizeof(CK_BBOOL) },
+		{ CKA_DERIVE, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_WRAP, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_UNWRAP, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_VALUE, &import_aes128_key, sizeof(import_aes128_key) },
+		{ CKA_CHECK_VALUE, NULL, 0 },
+	};
+	CK_ATTRIBUTE import_aes_key_template_invalid[] = {
+		{ CKA_TOKEN, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_PRIVATE, &(CK_BBOOL){ CK_FALSE }, sizeof(CK_BBOOL) },
+		{ CKA_SENSITIVE, &(CK_BBOOL){ CK_FALSE }, sizeof(CK_BBOOL) },
+		{ CKA_EXTRACTABLE, &(CK_BBOOL){ CK_TRUE }, sizeof(CK_BBOOL) },
+		{ CKA_CLASS, &(CK_OBJECT_CLASS){CKO_SECRET_KEY},
+		  sizeof(CK_OBJECT_CLASS) },
+		{ CKA_KEY_TYPE, &(CK_KEY_TYPE){CKK_AES}, sizeof(CK_KEY_TYPE) },
+		{ CKA_ENCRYPT, &(CK_BBOOL){CK_FALSE}, sizeof(CK_BBOOL) },
+		{ CKA_DECRYPT, &(CK_BBOOL){CK_FALSE}, sizeof(CK_BBOOL) },
+		{ CKA_DERIVE, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_WRAP, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_UNWRAP, &(CK_BBOOL){CK_TRUE}, sizeof(CK_BBOOL) },
+		{ CKA_VALUE, &import_aes128_key, sizeof(import_aes128_key) },
+		{ CKA_CHECK_VALUE, &import_aes128_kcv_invalid,
+		  sizeof(import_aes128_kcv_invalid) },
+	};
 	CK_ATTRIBUTE kcv_attr_template[] = {
 		{ CKA_CHECK_VALUE, &kcv, sizeof(kcv) },
 	};
@@ -9033,7 +9066,51 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	Do_ADBG_EndSubCase(c, NULL);
 
 	/*
-	 * Import an object which a wellformed precomputed KCV value
+	 * Import an object with a non-value KCV
+	 */
+	Do_ADBG_BeginSubCase(c, "Set no-value KCV on C_CreateObject()");
+
+	rv = C_CreateObject(session, import_aes_key_template_novalue,
+			    ARRAY_SIZE(import_aes_key_template_novalue),
+			    &key_handle);
+
+	if (ADBG_EXPECT_CK_OK(c, rv)) {
+		kcv_attr_template[0].pValue = kcv;
+		kcv_attr_template[0].ulValueLen = sizeof(kcv);
+		rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
+					 ARRAY_SIZE(kcv_attr_template));
+		if (ADBG_EXPECT_CK_OK(c, rv))
+			ADBG_EXPECT_COMPARE_UNSIGNED(c,
+				kcv_attr_template[0].ulValueLen, ==, 0);
+
+		rv = C_DestroyObject(session, key_handle);
+		ADBG_EXPECT_CK_OK(c, rv);
+		key_handle = CK_INVALID_HANDLE;
+	}
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Import an object with an invalid  KCV
+	 */
+	Do_ADBG_BeginSubCase(c, "Set invalid KCV on C_CreateObject()");
+
+	rv = C_CreateObject(session, import_aes_key_template_invalid,
+			    ARRAY_SIZE(import_aes_key_template_invalid),
+			    &key_handle);
+
+	if (!ADBG_EXPECT_NOT(c, CKR_OK, rv)) {
+		/* Unlikely the object withas created */
+		rv = C_DestroyObject(session, key_handle);
+		ADBG_EXPECT_CK_OK(c, rv);
+		key_handle = CK_INVALID_HANDLE;
+	}
+
+	Do_ADBG_EndSubCase(c, NULL);
+
+	/*
+	 * Import an object with a wellformed precomputed KCV value
+	 * The object will be reused.
 	 */
 	Do_ADBG_BeginSubCase(c, "Set KCV on C_CreateObject()");
 
@@ -9045,6 +9122,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 
 	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
+
 	if (ADBG_EXPECT_CK_OK(c, rv))
 	    ADBG_EXPECT_BUFFER(c, import_aes128_kcv_valid,
 			       sizeof(import_aes128_kcv_valid),
