@@ -9030,6 +9030,9 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_subcase;
 
+	memset(&kcv, 0, sizeof(kcv));
+	kcv_attr_template[0].pValue = kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 
@@ -9120,6 +9123,9 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
 
+	memset(&kcv, 0, sizeof(kcv));
+	kcv_attr_template[0].pValue = kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 
@@ -9140,6 +9146,9 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
 
+	memset(&kcv, 0, sizeof(kcv));
+	kcv_attr_template[0].pValue = kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 	if (ADBG_EXPECT_CK_OK(c, rv))
@@ -9162,6 +9171,9 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
 
+	memset(&kcv, 0, sizeof(kcv));
+	kcv_attr_template[0].pValue = kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, key_handle_cp, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 	if (ADBG_EXPECT_CK_OK(c, rv))
@@ -9206,6 +9218,8 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 		goto out_destr_obj;
 
 	memset(&kcv, 0, sizeof(kcv));
+	kcv_attr_template[0].pValue = kcv;
+	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, derived_key_handle, kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
 	if (!ADBG_EXPECT_CK_OK(c, rv))
@@ -9258,6 +9272,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
 
+	memset(&kcv, 0, sizeof(kcv));
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
@@ -9275,6 +9290,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	 */
 	Do_ADBG_BeginSubCase(c, "Create an invalid KCV using C_SetAttributeValue()");
 
+	memset(&kcv, 0, sizeof(kcv));
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
@@ -9289,6 +9305,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 		goto out_destr_obj;
 
 	/* Check object's KCV is still no-value */
+	memset(&kcv, 0, sizeof(kcv));
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
@@ -9328,6 +9345,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 		goto out_destr_obj;
 
 	/* Check object's KCV is still no-value */
+	memset(&kcv, 0, sizeof(kcv));
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
@@ -9355,6 +9373,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 		goto out_destr_obj;
 
 	/* Check KCV is the expected one */
+	memset(&kcv, 0, sizeof(kcv));
 	kcv_attr_template[0].pValue = &kcv;
 	kcv_attr_template[0].ulValueLen = sizeof(kcv);
 	rv = C_GetAttributeValue(session, unwrapped_key_handle,
