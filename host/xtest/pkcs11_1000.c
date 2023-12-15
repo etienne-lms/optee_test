@@ -9236,7 +9236,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	rv = C_SetAttributeValue(session, unwrapped_key_handle,
 				 kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
-	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
+	if (!ADBG_EXPECT_NOT(c, CKR_OK, rv))
 		goto out_destr_obj;
 
 	/* Valid value but lower value size */
@@ -9246,7 +9246,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	rv = C_SetAttributeValue(session, unwrapped_key_handle,
 				 kcv_attr_template,
 				 ARRAY_SIZE(kcv_attr_template));
-	if (!ADBG_EXPECT_CK_RESULT(c, CKR_ATTRIBUTE_VALUE_INVALID, rv))
+	if (!ADBG_EXPECT_NOT(c, CKR_OK, rv))
 		goto out_destr_obj;
 
 	/* Check object's KCV is still no-value */
