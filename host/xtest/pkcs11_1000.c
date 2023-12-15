@@ -9044,6 +9044,7 @@ static void xtest_pkcs11_test_1029(ADBG_Case_t *c)
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
 
+	/* Generate the 3 bytes KCV using key value */
 	rv = C_EncryptInit(session, &cktest_aes_ecb_mechanism, key_handle);
 	if (!ADBG_EXPECT_CK_OK(c, rv))
 		goto out_destr_obj;
